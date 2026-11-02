@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { EntrenadorInfo } from '../../data/entrenador.models';
@@ -21,6 +21,18 @@ export class MiEntrenador {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly estado = signal<Estado>({ tipo: 'cargando' });
+
+  /** Acceso tipado al entrenador cuando estado es 'ok' */
+  protected readonly entrenador = computed<EntrenadorInfo | null>(() => {
+    const e = this.estado();
+    return e.tipo === 'ok' ? e.entrenador : null;
+  });
+
+  /** Mensaje de error cuando estado es 'error' */
+  protected readonly errorMsg = computed<string>(() => {
+    const e = this.estado();
+    return e.tipo === 'error' ? e.mensaje : '';
+  });
 
   constructor() {
     this.cargar();
@@ -49,8 +61,8 @@ export class MiEntrenador {
       });
   }
 
-  protected iniciales(nombre: string, apellido: string): string {
-    return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase();
+  protected iniciales(e: EntrenadorInfo): string {
+    return ((e.nombre?.[0] ?? '') + (e.apellido?.[0] ?? '')).toUpperCase();
   }
 
   protected mailtoLink(correo: string): string {

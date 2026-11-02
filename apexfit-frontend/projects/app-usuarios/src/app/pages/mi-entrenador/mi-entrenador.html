@@ -17,8 +17,8 @@
           <circle cx="12" cy="12" r="10"/>
           <path d="M12 8v4M12 16h.01"/>
         </svg>
-        <p>{{ estado().tipo === 'error' ? $any(estado()).mensaje : '' }}</p>
-        <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+        <p>{{ errorMsg() }}</p>
+        <button class="btn-reintentar" type="button" (click)="cargar()">Reintentar</button>
       </div>
     }
 
@@ -34,50 +34,45 @@
     }
 
     @case ('ok') {
-      <div class="tarjeta">
-        <!-- Avatar con iniciales -->
-        <div class="avatar" aria-hidden="true">
-          {{ iniciales($any(estado()).entrenador.nombre, $any(estado()).entrenador.apellido) }}
-        </div>
+      @if (entrenador(); as e) {
+        <div class="tarjeta">
+          <!-- Avatar con iniciales -->
+          <div class="avatar" aria-hidden="true">{{ iniciales(e) }}</div>
 
-        <div class="info">
-          <h3 class="nombre">
-            {{ $any(estado()).entrenador.nombre }} {{ $any(estado()).entrenador.apellido }}
-          </h3>
-          <span class="badge" [class.badge--activo]="$any(estado()).entrenador.estado === 'activa'">
-            {{ $any(estado()).entrenador.estado === 'activa' ? 'Asignación activa' : $any(estado()).entrenador.estado }}
-          </span>
-        </div>
+          <div class="info">
+            <h3 class="nombre">{{ e.nombre }} {{ e.apellido }}</h3>
+            <span class="badge" [class.badge--activo]="e.estado === 'activa'">
+              {{ e.estado === 'activa' ? 'Asignación activa' : e.estado }}
+            </span>
+          </div>
 
-        <ul class="contacto">
-          <li>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <path d="M2 7l10 7 10-7"/>
-            </svg>
-            <a [href]="mailtoLink($any(estado()).entrenador.correo)">
-              {{ $any(estado()).entrenador.correo }}
-            </a>
-          </li>
-
-          @if ($any(estado()).entrenador.telefono) {
+          <ul class="contacto">
             <li>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3 4.18 2 2 0 0 1 5 2h2.09a2 2 0 0 1 2 1.72c.13 1 .37 1.97.72 2.9a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.18-1.18a2 2 0 0 1 2.11-.45c.93.35 1.9.59 2.9.72A2 2 0 0 1 22 16.92z"/>
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M2 7l10 7 10-7"/>
               </svg>
-              <a [href]="telLink($any(estado()).entrenador.telefono)">
-                {{ $any(estado()).entrenador.telefono }}
-              </a>
+              <a [href]="mailtoLink(e.correo)">{{ e.correo }}</a>
             </li>
-          }
-        </ul>
 
-        <p class="aviso">
-          💬 Para comunicarte con tu entrenador, escríbele al correo o llámalo por teléfono.
-          Él podrá orientarte con tus rutinas y seguimiento físico.
-        </p>
-      </div>
+            @if (e.telefono) {
+              <li>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3 4.18 2 2 0 0 1 5 2h2.09a2 2 0 0 1 2 1.72c.13 1 .37 1.97.72 2.9a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.18-1.18a2 2 0 0 1 2.11-.45c.93.35 1.9.59 2.9.72A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a [href]="telLink(e.telefono)">{{ e.telefono }}</a>
+              </li>
+            }
+          </ul>
+
+          <p class="aviso">
+            💬 Para comunicarte con tu entrenador, escríbele al correo o llámalo por teléfono.
+            Él podrá orientarte con tus rutinas y seguimiento físico.
+          </p>
+        </div>
+      }
     }
+
   }
 
 </section>

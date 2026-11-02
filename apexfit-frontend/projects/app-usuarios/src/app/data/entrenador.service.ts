@@ -10,8 +10,8 @@ export class EntrenadorService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = inject(API_URL);
 
-  /** GET /mi-entrenador → 200 con datos o 204 sin contenido */
+  /** GET /mi-entrenador → 200 con datos o 204 sin contenido (body null) */
   miEntrenador(): Observable<EntrenadorInfo | null> {
-    return this.http.get<EntrenadorInfo>(`${this.apiUrl}/mi-entrenador`);
+    return this.http.get<EntrenadorInfo | null>(`${this.apiUrl}/mi-entrenador`);
   }
 }

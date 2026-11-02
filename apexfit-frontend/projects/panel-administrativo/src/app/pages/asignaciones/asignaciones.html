@@ -1,0 +1,221 @@
+@let c = carga();
+@let t = tablero();
+
+<header class="cabecera">
+  <div>
+    <h1 class="titulo">Asignaciones</h1>
+    <p class="af-muted subtitulo">Qué entrenador atiende a cada cliente.</p>
+  </div>
+</header>
+
+@if (avisoDias(); as d) {
+  <p class="nota-aviso" role="status">{{ d }}</p>
+}
+
+@if (aviso(); as a) {
+  <p [class]="a.tipo === 'ok' ? 'aviso ok' : 'aviso error'" [attr.role]="a.tipo === 'ok' ? 'status' : 'alert'">
+    {{ a.texto }}
+  </p>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando asignaciones…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else {
+  @if (c.datos.total > c.datos.usuarios.length) {
+    <p class="nota-aviso" role="status">
+      Hay {{ c.datos.total }} usuarios en total y aquí se cargan los primeros {{ tamanoPagina }}.
+    </p>
+  }
+
+  <div class="kpis">
+    <div class="af-card kpi">
+      <b>{{ t.entrenadores.length }}</b>
+      <span>{{ t.entrenadores.length === 1 ? 'Entrenador' : 'Entrenadores' }}</span>
+    </div>
+    <div class="af-card kpi">
+      <b>{{ t.conEntrenador }}</b>
+      <span>{{ t.conEntrenador === 1 ? 'Cliente con entrenador' : 'Clientes con entrenador' }}</span>
+    </div>
+    <div class="af-card kpi" [class.alerta]="t.sinEntrenador.length > 0">
+      <b>{{ t.sinEntrenador.length }}</b>
+      <span>{{ t.sinEntrenador.length === 1 ? 'Cliente sin entrenador' : 'Clientes sin entrenador' }}</span>
+    </div>
+  </div>
+
+  @if (t.entrenadores.length === 0) {
+    <p class="vacio">
+      No hay entrenadores activos. Crea uno en <a routerLink="/usuarios">Usuarios</a> con el rol Entrenador.
+    </p>
+  } @else {
+    <div class="tablero">
+      <nav class="entrenadores" aria-label="Entrenadores">
+        <ul>
+          @for (f of t.entrenadores; track f.entrenador.id) {
+            <li>
+              <button
+                type="button"
+                class="entrenador"
+                [class.activo]="actual()?.entrenador.id === f.entrenador.id"
+                [attr.aria-pressed]="actual()?.entrenador.id === f.entrenador.id"
+                (click)="elegir(f.entrenador.id)"
+              >
+                <b>{{ f.entrenador.nombreCompleto }}</b>
+                <small>
+                  {{ f.clientes.length }} {{ f.clientes.length === 1 ? 'cliente' : 'clientes' }}
+                  @if (!f.entrenador.activo) {
+                    · inactivo
+                  }
+                </small>
+              </button>
+            </li>
+          }
+        </ul>
+      </nav>
+
+      @if (actual(); as a) {
+        <section class="af-card detalle" aria-labelledby="titulo-entrenador">
+          <h2 id="titulo-entrenador">{{ a.entrenador.nombreCompleto }}</h2>
+          <p class="af-muted correo">{{ a.entrenador.correo }}</p>
+
+          @if (a.entrenador.activo) {
+            <form class="asignar" [formGroup]="form" (ngSubmit)="asignarElegido()" novalidate>
+              <label>
+                Buscar cliente
+                <input
+                  type="search"
+                  placeholder="Nombre o correo"
+                  autocomplete="off"
+                  [value]="busqueda()"
+                  (input)="busqueda.set(valor($event))"
+                  (keydown.enter)="$event.preventDefault()"
+                />
+              </label>
+              <label>
+                Asignar un cliente
+                <select formControlName="idCliente" (change)="alElegirCliente($event)">
+                  <option value="">Elige un cliente…</option>
+                  @if (opcionesVisibles().libres.length > 0) {
+                    <optgroup label="Sin entrenador">
+                      @for (cl of opcionesVisibles().libres; track cl.id) {
+                        <option [value]="cl.id">{{ textoCliente(cl) }}</option>
+                      }
+                    </optgroup>
+                  }
+                  @if (opcionesVisibles().conOtros.length > 0) {
+                    <optgroup label="Ya tienen otro entrenador">
+                      @for (o of opcionesVisibles().conOtros; track o.cliente.id) {
+                        <option [value]="o.cliente.id">{{ textoCliente(o.cliente, o.entrenadores) }}</option>
+                      }
+                    </optgroup>
+                  }
+                </select>
+                @if (busqueda().trim() && opcionesVisibles().libres.length + opcionesVisibles().conOtros.length === 0) {
+                  <small class="af-muted">Ningún cliente coincide con «{{ busqueda().trim() }}».</small>
+                }
+                @if (form.controls.idCliente.touched && form.controls.idCliente.invalid) {
+                  <small class="error" role="alert">Elige un cliente.</small>
+                }
+                @if (yaConOtros(); as otros) {
+                  <small class="nota-aviso">Este cliente ya tiene a {{ otros.join(', ') }}: tendrá más de un entrenador.</small>
+                }
+              </label>
+              <button #botonAsignar class="af-btn" type="submit" [disabled]="ocupado() !== null">Asignar</button>
+            </form>
+          } @else {
+            <p class="nota-aviso">
+              Este entrenador está inactivo: no se le pueden asignar más clientes. Quita a los que tiene para que otro los atienda.
+            </p>
+          }
+
+          @if (a.clientes.length === 0) {
+            <p class="vacio">{{ a.entrenador.nombre }} todavía no tiene clientes asignados.</p>
+          } @else {
+            <ul class="clientes" [attr.aria-label]="'Clientes de ' + a.entrenador.nombreCompleto">
+              @for (cl of a.clientes; track cl.asignacion.id) {
+                <li>
+                  <div class="datos">
+                    <span>
+                      <b>{{ cl.nombre }}</b>
+                      @if (inactivos().has(cl.idCliente)) {
+                        <span class="etiqueta" [attr.title]="'Más de ' + diasInactividad + ' días sin asistir'">Inactivo</span>
+                      }
+                    </span>
+                    @if (cl.correo) {
+                      <small class="af-muted">{{ cl.correo }}</small>
+                    }
+                    @if (cl.asignacion.desde; as desde) {
+                      <small class="af-muted">Desde el {{ fecha(desde) }}</small>
+                    }
+                  </div>
+                  <div class="acciones">
+                    @if (confirmandoId() === cl.asignacion.id) {
+                      <span class="confirmar">¿Quitar a {{ cl.nombre }}?</span>
+                      <button class="af-btn peligro" type="button" (click)="quitar(cl)">Sí, quitar</button>
+                      <button class="af-btn af-btn--outline" type="button" (click)="descartarConfirmacion()">No</button>
+                    } @else {
+                      <button
+                        class="af-btn af-btn--outline"
+                        type="button"
+                        [disabled]="ocupado() !== null"
+                        [attr.aria-label]="'Quitar a ' + cl.nombre + ' de ' + a.entrenador.nombreCompleto"
+                        (click)="pedirConfirmacion(cl)"
+                      >
+                        Quitar
+                      </button>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
+
+    @if (t.sinEntrenador.length > 0) {
+      <section class="af-card sin-entrenador" aria-labelledby="titulo-sin">
+        <h2 id="titulo-sin">Clientes sin entrenador</h2>
+        @if (actual(); as a) {
+          @if (a.entrenador.activo) {
+            <p class="af-muted">Asígnalos a {{ a.entrenador.nombreCompleto }}, o elige otro entrenador en la lista.</p>
+          }
+        }
+        <ul class="clientes">
+          @for (cl of t.sinEntrenador; track cl.id) {
+            <li>
+              <div class="datos">
+                <span>
+                  <b>{{ cl.nombreCompleto }}</b>
+                  @if (inactivos().has(cl.id)) {
+                    <span class="etiqueta" [attr.title]="'Más de ' + diasInactividad + ' días sin asistir'">Inactivo</span>
+                  }
+                </span>
+                <small class="af-muted">{{ cl.correo }}</small>
+              </div>
+              @if (actual(); as a) {
+                @if (a.entrenador.activo) {
+                  <div class="acciones">
+                    <button
+                      class="af-btn"
+                      type="button"
+                      [disabled]="ocupado() !== null"
+                      [attr.aria-label]="'Asignar a ' + cl.nombreCompleto + ' con ' + a.entrenador.nombreCompleto"
+                      (click)="asignar(cl.id)"
+                    >
+                      Asignar a {{ a.entrenador.nombre }}
+                    </button>
+                  </div>
+                }
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+}

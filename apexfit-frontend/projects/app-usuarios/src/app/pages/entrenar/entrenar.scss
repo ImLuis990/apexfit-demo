@@ -1,0 +1,150 @@
+@use '../pantalla';
+
+.volver {
+  color: var(--af-red-hover);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.titulo {
+  font-size: 26px;
+}
+
+.barra {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--af-border);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--af-red);
+    transition: width 0.25s ease;
+  }
+}
+
+.contador {
+  margin: 0;
+  font-weight: 700;
+  color: var(--af-muted);
+}
+
+.aplazados {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--af-amber);
+  border-radius: var(--af-radius-sm);
+  color: var(--af-amber);
+  font-weight: 700;
+}
+
+.ejercicio {
+  display: grid;
+  gap: 12px;
+
+  h2 {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+  margin: 0;
+
+  div {
+    border: 1px solid var(--af-border);
+    border-radius: var(--af-radius-sm);
+    padding: 10px;
+    text-align: center;
+  }
+
+  dt {
+    color: var(--af-muted);
+    font-size: 13px;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-size: 30px;
+    font-weight: 800;
+  }
+}
+
+.video {
+  color: var(--af-red-hover);
+  font-weight: 700;
+}
+
+.acciones {
+  display: grid;
+  gap: 10px;
+}
+
+.grande {
+  min-height: 56px;
+  font-size: 18px;
+}
+
+.resumen {
+  display: grid;
+  gap: 10px;
+
+  h2 {
+    font-size: 28px;
+  }
+
+  h3 {
+    margin: 4px 0 0;
+    font-size: 17px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .sin-hacer li {
+    color: var(--af-amber);
+  }
+}
+
+.reiniciar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  text-align: center;
+
+  .peligro {
+    background: var(--af-red);
+    color: #fff;
+  }
+}
+
+.enlace {
+  background: none;
+  border: 0;
+  padding: 6px;
+  color: var(--af-muted);
+  font: inherit;
+  text-decoration: underline;
+}
+
+.sin-sincronizar {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--af-border);
+  border-radius: var(--af-radius-sm);
+  color: var(--af-muted);
+  font-size: 14px;
+}

@@ -1,0 +1,68 @@
+:host {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  max-width: 640px;
+  padding: 22px 18px 24px;
+}
+
+h1 {
+  font-size: 30px;
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.datos {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+
+  div {
+    display: grid;
+    grid-template-columns: minmax(120px, 40%) 1fr;
+    gap: 8px;
+  }
+
+  dt {
+    color: var(--af-muted);
+    font-size: 14px;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+.error {
+  color: var(--af-red-hover);
+  font-weight: 600;
+}
+
+.error-form {
+  color: var(--af-red-hover);
+  background: #e5131d22;
+  border: 1px solid var(--af-red);
+  border-radius: var(--af-radius-sm);
+  padding: 10px 12px;
+  font-weight: 600;
+}
+
+.exito {
+  color: var(--af-ok);
+  background: #3ddc9722;
+  border: 1px solid var(--af-ok);
+  border-radius: var(--af-radius-sm);
+  padding: 10px 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}

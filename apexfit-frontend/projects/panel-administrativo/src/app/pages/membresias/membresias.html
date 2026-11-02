@@ -1,0 +1,191 @@
+@let c = carga();
+
+<header class="cabecera">
+  <h1 class="titulo">Membresías</h1>
+  <button class="af-btn" type="button" (click)="abrirCrear()">+ Nueva membresía</button>
+</header>
+
+@if (aviso(); as a) {
+  <p [class]="a.tipo === 'ok' ? 'aviso ok' : 'aviso error'" [attr.role]="a.tipo === 'ok' ? 'status' : 'alert'">
+    {{ a.texto }}
+  </p>
+}
+
+@if (modo(); as m) {
+  <form class="af-card formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2>{{ m === 'crear' ? 'Nueva membresía' : m === 'renovar' ? 'Renovar membresía' : 'Editar membresía' }}</h2>
+
+    <label>
+      Cliente
+      <select formControlName="idUsuario">
+        @if (m === 'crear') {
+          <option value="">Elige un cliente…</option>
+        }
+        @if (m === 'crear') {
+          @for (cl of clientes(); track cl.id) {
+            <option [value]="cl.id">{{ cl.nombreCompleto }} · {{ cl.correo }}</option>
+          }
+        } @else {
+          @for (f of filas(); track f.m.id) {
+            @if (f.m.idUsuario === (editando()?.idUsuario ?? +form.controls.idUsuario.value)) {
+              <option [value]="f.m.idUsuario" selected>{{ f.cliente }}</option>
+            }
+          }
+        }
+      </select>
+      @if (form.controls.idUsuario.touched && form.controls.idUsuario.invalid) {
+        <small class="error" role="alert">Elige un cliente.</small>
+      }
+      @if (yaTieneVigente(); as hasta) {
+        <small class="nota-aviso">Este cliente ya tiene una membresía vigente hasta el {{ fecha(hasta) }}.</small>
+      }
+    </label>
+
+    <div class="par">
+      <label>
+        Plan
+        <select formControlName="plan">
+          @for (p of opcionesPlan(); track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Precio (COP)
+        <input type="number" inputmode="numeric" step="1000" formControlName="precio" />
+        @if (form.controls.precio.touched && form.controls.precio.invalid) {
+          <small class="error" role="alert">Escribe un precio mayor que 0.</small>
+        }
+      </label>
+    </div>
+
+    <div class="par">
+      <label>
+        Fecha de inicio
+        <input type="date" formControlName="fechaInicio" />
+        @if (form.controls.fechaInicio.touched && form.controls.fechaInicio.invalid) {
+          <small class="error" role="alert">Elige la fecha de inicio.</small>
+        }
+      </label>
+      <label>
+        Fecha de fin
+        <input type="date" formControlName="fechaFin" />
+        @if (form.controls.fechaFin.touched && form.controls.fechaFin.invalid) {
+          <small class="error" role="alert">Elige la fecha de fin.</small>
+        } @else if (form.controls.fechaFin.touched && form.hasError('finAntesDeInicio')) {
+          <small class="error" role="alert">La fecha de fin no puede ser anterior al inicio.</small>
+        }
+      </label>
+    </div>
+
+    @if (m === 'editar') {
+      <label>
+        Estado
+        <select formControlName="estado">
+          <option value="activa">Activa</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+      </label>
+    }
+
+    <div class="botones">
+      <button class="af-btn" type="submit" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <button class="af-btn af-btn--outline" type="button" (click)="cerrarFormulario()">Cancelar</button>
+    </div>
+  </form>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando membresías…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else if (c.datos.membresias.length === 0) {
+  <p class="vacio">Todavía no hay membresías. Crea la primera con «+ Nueva membresía».</p>
+} @else {
+  <div class="chips" role="group" aria-label="Filtrar por estado">
+    @for (f of filtros; track f.valor) {
+      <button
+        type="button"
+        class="chip"
+        [class.activo]="filtroEstado() === f.valor"
+        [attr.aria-pressed]="filtroEstado() === f.valor"
+        (click)="filtroEstado.set(f.valor)"
+      >
+        {{ f.etiqueta }} <span class="n">{{ conteos()[f.valor] }}</span>
+      </button>
+    }
+  </div>
+
+  <label class="busqueda">
+    Buscar cliente
+    <input type="search" placeholder="Nombre o correo" [value]="texto()" (input)="buscar($event)" />
+  </label>
+
+  <p class="conteo af-muted" role="status">Mostrando {{ visibles().length }} de {{ c.datos.membresias.length }} membresías</p>
+
+  @if (visibles().length === 0) {
+    <p class="vacio">Ninguna membresía coincide con tu búsqueda.</p>
+  } @else {
+    <div class="af-card tabla" tabindex="0" role="region" aria-label="Lista de membresías">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Cliente</th>
+            <th scope="col">Plan</th>
+            <th scope="col">Inicio</th>
+            <th scope="col">Fin</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Estado</th>
+            <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of visibles(); track f.m.id) {
+            <tr>
+              <td>
+                <b>{{ f.cliente }}</b>
+                @if (f.correo) {
+                  <br /><small class="af-muted">{{ f.correo }}</small>
+                }
+              </td>
+              <td>{{ f.m.tipo }}</td>
+              <td>{{ fecha(f.m.fechaInicio) }}</td>
+              <td>{{ fecha(f.m.fechaFin) }}</td>
+              <td>{{ dinero(f.m.precio) }}</td>
+              <td>
+                <span
+                  class="af-tag"
+                  [class.af-tag--warn]="f.estado === 'por-vencer'"
+                  [class.af-tag--danger]="f.estado === 'vencida'"
+                  [class.cancelada]="f.estado === 'cancelada'"
+                  >{{ etiquetaEstado[f.estado] }}</span
+                >
+                @if (f.estado === 'por-vencer') {
+                  <small class="af-muted"> · {{ f.diasRestantes === 0 ? 'vence hoy' : f.diasRestantes === 1 ? 'mañana' : f.diasRestantes + ' días' }}</small>
+                }
+              </td>
+              <td class="acciones">
+                @if (confirmandoId() === f.m.id) {
+                  <span class="confirmar">¿Cancelar la membresía de {{ f.cliente }}?</span>
+                  <button class="af-btn peligro" type="button" (click)="cancelar(f)">Sí, cancelar</button>
+                  <button class="af-btn af-btn--outline" type="button" (click)="descartarConfirmacion()">No</button>
+                } @else {
+                  <button class="af-btn af-btn--outline" type="button" [attr.aria-label]="'Editar membresía de ' + f.cliente" (click)="abrirEditar(f)">Editar</button>
+                  <button class="af-btn af-btn--outline" type="button" [attr.aria-label]="'Renovar membresía de ' + f.cliente" (click)="abrirRenovar(f)">Renovar</button>
+                  @if (f.estado !== 'cancelada') {
+                    <button class="af-btn af-btn--outline" type="button" [attr.aria-label]="'Cancelar membresía de ' + f.cliente" (click)="pedirConfirmacion(f)">Cancelar</button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}

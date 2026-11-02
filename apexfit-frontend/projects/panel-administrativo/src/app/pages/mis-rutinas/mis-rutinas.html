@@ -1,0 +1,201 @@
+@let c = carga();
+
+<header class="cabecera">
+  <div>
+    <h1 class="titulo">Mis rutinas</h1>
+    <p class="af-muted subtitulo">Las rutinas que creaste para tus clientes.</p>
+  </div>
+  <a class="af-btn" routerLink="/rutinas">+ Nueva rutina</a>
+</header>
+
+@if (aviso(); as a) {
+  <p [class]="a.tipo === 'ok' ? 'aviso ok' : 'aviso error'" [attr.role]="a.tipo === 'ok' ? 'status' : 'alert'">
+    {{ a.texto }}
+  </p>
+}
+
+@if (editando(); as r) {
+  <form class="af-card formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2>Editar rutina de {{ r.cliente }}</h2>
+
+    @if (editor() === 'cargando') {
+      <p class="af-muted" role="status">Cargando ejercicios…</p>
+    } @else if (editor() === 'error') {
+      <p class="error" role="alert">No pudimos cargar los ejercicios de la rutina. Intenta de nuevo.</p>
+      <div class="acciones">
+        <button class="af-btn" type="button" (click)="abrirEditar(r)">Reintentar</button>
+        <button class="af-btn af-btn--outline" type="button" (click)="cancelar()">Cerrar</button>
+      </div>
+    } @else {
+      <label>
+        Nombre
+        <input type="text" formControlName="nombre" maxlength="100" autocomplete="off" />
+        @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+          <small class="error" role="alert">Escribe el nombre de la rutina.</small>
+        }
+      </label>
+      <label>
+        Descripción (opcional)
+        <textarea formControlName="descripcion" rows="2" maxlength="500"></textarea>
+      </label>
+
+      <h3>Ejercicios</h3>
+      @for (g of lineas.controls; track g; let i = $index) {
+        <div class="linea" [formGroup]="g">
+          @if (esLineaNueva(g)) {
+            <label>
+              Ejercicio
+              <select formControlName="idEjercicio">
+                <option value="">Elige un ejercicio…</option>
+                @for (e of catalogo(); track e.id) {
+                  <option [value]="e.id">{{ e.nombre }}</option>
+                }
+              </select>
+            </label>
+          } @else {
+            <p class="ejercicio">
+              <b>{{ g.controls['ejercicio'].value }}</b>
+            </p>
+          }
+          <label>
+            Día
+            <select formControlName="dia">
+              <option value="">Elige…</option>
+              @for (d of dias; track d.valor) {
+                <option [value]="d.valor">{{ d.etiqueta }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Series
+            <input type="number" inputmode="numeric" min="1" max="20" formControlName="series" />
+          </label>
+          <label>
+            Repeticiones
+            <input type="number" inputmode="numeric" min="1" max="100" formControlName="repeticiones" />
+          </label>
+          <label>
+            Descanso (s)
+            <input type="number" inputmode="numeric" min="0" max="600" formControlName="descanso" />
+          </label>
+          <button
+            class="af-btn af-btn--outline"
+            type="button"
+            [attr.aria-label]="'Quitar ' + (g.controls['ejercicio'].value || 'el ejercicio nuevo')"
+            (click)="quitarLinea(i)"
+          >
+            Quitar
+          </button>
+        </div>
+      }
+      @if (lineas.touched && lineas.invalid) {
+        <small class="error" role="alert">Revisa los ejercicios: elige el ejercicio y el día, y que series y repeticiones sean válidas.</small>
+      }
+      <div>
+        <button class="af-btn af-btn--outline" type="button" (click)="agregarLinea()">+ Agregar ejercicio</button>
+      </div>
+
+      <div class="acciones">
+        <button class="af-btn" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Guardar cambios' }}</button>
+        <button class="af-btn af-btn--outline" type="button" [disabled]="guardando()" (click)="cancelar()">Cancelar</button>
+      </div>
+    }
+  </form>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando tus rutinas…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else {
+  @if (c.datos.total > tamanoPagina) {
+    <p class="nota-aviso" role="status">
+      Hay {{ c.datos.total }} rutinas en total y aquí se cargan las primeras {{ tamanoPagina }}: puede que falten algunas tuyas.
+    </p>
+  }
+
+  @if (c.datos.rutinas.length === 0) {
+    <p class="vacio">Todavía no has creado rutinas. Crea la primera en <a routerLink="/rutinas">Nueva rutina</a>.</p>
+  } @else {
+    <div class="filtros">
+      <label>
+        Buscar
+        <input type="search" placeholder="Cliente o nombre de la rutina" [value]="texto()" (input)="texto.set(valor($event))" />
+      </label>
+      <label>
+        Estado
+        <select [value]="estado()" (change)="cambiarEstado($event)">
+          <option value="activa">Activas</option>
+          <option value="inactiva">Inactivas</option>
+          <option value="">Todas</option>
+        </select>
+      </label>
+    </div>
+
+    @if (visibles().length === 0) {
+      <p class="vacio">Ninguna rutina coincide con los filtros.</p>
+    } @else {
+      <div class="af-card tabla">
+        <table>
+          <caption class="solo-lectores">Rutinas del entrenador</caption>
+          <thead>
+            <tr>
+              <th scope="col">Cliente</th>
+              <th scope="col">Rutina</th>
+              <th scope="col">Creada</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of visibles(); track r.id) {
+              <tr>
+                <td>{{ r.cliente }}</td>
+                <td>
+                  <b>{{ r.nombre }}</b>
+                </td>
+                <td>{{ r.creada ? fecha(r.creada) : '—' }}</td>
+                <td>
+                  <span class="estado" [class.activa]="r.activa">{{ r.activa ? 'Activa' : 'Inactiva' }}</span>
+                </td>
+                <td>
+                  <div class="acciones">
+                    @if (!r.activa) {
+                      —
+                    } @else if (confirmandoId() === r.id) {
+                      <span class="confirmar">¿Desactivar?</span>
+                      <button class="af-btn peligro" type="button" (click)="desactivar(r)">Sí, desactivar</button>
+                      <button class="af-btn af-btn--outline" type="button" (click)="descartarDesactivar()">No</button>
+                    } @else {
+                      <button
+                        class="af-btn af-btn--outline"
+                        type="button"
+                        [disabled]="ocupado() !== null || editando() !== null"
+                        [attr.aria-label]="'Editar ' + r.nombre"
+                        (click)="abrirEditar(r)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="af-btn af-btn--outline"
+                        type="button"
+                        [disabled]="ocupado() !== null || editando() !== null"
+                        [attr.aria-label]="'Desactivar ' + r.nombre"
+                        (click)="pedirDesactivar(r)"
+                      >
+                        Desactivar
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+}

@@ -1,0 +1,27 @@
+// Estilos comunes de las pantallas del cliente (se importa con @use en cada una).
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 18px 12px;
+}
+
+.titulo {
+  font-size: 30px;
+}
+
+.fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+// Aviso cuando todavía no hay información que mostrar.
+.vacio {
+  border: 1px dashed var(--af-border);
+  border-radius: var(--af-radius);
+  padding: 18px;
+  text-align: center;
+  color: var(--af-muted);
+}

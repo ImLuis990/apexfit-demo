@@ -1,0 +1,68 @@
+<header>
+  <h1>Mi cuenta</h1>
+</header>
+
+<section class="af-card" aria-label="Mis datos">
+  <h2>Mis datos</h2>
+  @let p = perfil();
+  @if (p.tipo === 'cargando') {
+    <p class="af-muted" role="status">Cargando tus datos…</p>
+  } @else if (p.tipo === 'error') {
+    <p class="error" role="alert">No pudimos cargar tus datos.</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  } @else {
+    <dl class="datos">
+      <div><dt>Nombre</dt><dd>{{ p.datos.nombre }} {{ p.datos.apellido }}</dd></div>
+      <div><dt>Correo</dt><dd>{{ p.datos.correo }}</dd></div>
+      <div><dt>Teléfono</dt><dd>{{ p.datos.telefono || '—' }}</dd></div>
+      <div><dt>Fecha de nacimiento</dt><dd>{{ fecha(p.datos.fechaNacimiento) }}</dd></div>
+      <div><dt>Rol</dt><dd>{{ rol() }}</dd></div>
+    </dl>
+  }
+</section>
+
+<section class="af-card" aria-label="Cambiar contraseña">
+  <h2>Cambiar contraseña</h2>
+
+  @if (ok()) {
+    <p class="exito" role="status">Contraseña actualizada.</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="cambiar()" novalidate>
+    <label>
+      Contraseña actual
+      <input type="password" formControlName="actual" autocomplete="current-password" />
+      @if (form.controls.actual.touched && form.controls.actual.invalid) {
+        <small class="error" role="alert">Escribe tu contraseña actual.</small>
+      }
+    </label>
+
+    <label>
+      Nueva contraseña
+      <input type="password" formControlName="nueva" autocomplete="new-password" />
+      @if (form.controls.nueva.touched && form.controls.nueva.invalid) {
+        <small class="error" role="alert">Debe tener al menos 6 caracteres.</small>
+      } @else if (form.controls.nueva.touched && form.hasError('igualActual')) {
+        <small class="error" role="alert">Debe ser distinta de la actual.</small>
+      }
+    </label>
+
+    <label>
+      Repite la nueva contraseña
+      <input type="password" formControlName="confirmar" autocomplete="new-password" />
+      @if (form.controls.confirmar.touched && form.controls.confirmar.invalid) {
+        <small class="error" role="alert">Repite la nueva contraseña.</small>
+      } @else if (form.controls.confirmar.touched && form.hasError('noCoinciden')) {
+        <small class="error" role="alert">Las contraseñas no coinciden.</small>
+      }
+    </label>
+
+    @if (errorForm(); as mensaje) {
+      <p class="error-form" role="alert">{{ mensaje }}</p>
+    }
+
+    <button class="af-btn af-btn--block" type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Cambiar contraseña' }}
+    </button>
+  </form>
+</section>

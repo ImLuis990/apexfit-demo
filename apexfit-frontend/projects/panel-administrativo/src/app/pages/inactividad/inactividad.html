@@ -1,0 +1,60 @@
+@let c = carga();
+@let n = filas().length;
+<header class="cabecera">
+  <h1 class="titulo">Inactividad</h1>
+</header>
+
+<section class="af-card config" aria-label="Configuración">
+  <label>
+    Días sin asistir para considerar a un cliente inactivo
+    <input #d type="number" inputmode="numeric" [min]="minDias" [max]="maxDias" step="1"
+           [value]="dias()" (change)="cambiarDias(d)" />
+  </label>
+  <small class="af-muted">Entre {{ minDias }} y {{ maxDias }} días. Solo cuentan los clientes activos con membresía vigente.</small>
+  @if (errorGuardado(); as e) {
+    <small class="nota-aviso" role="alert">{{ e }}</small>
+  }
+  @if (avisoDias(); as a) {
+    <small class="nota-aviso" role="status">{{ a }}</small>
+  }
+</section>
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando la inactividad…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else if (n === 0) {
+  <p class="vacio">Ningún cliente con membresía vigente lleva más de {{ dias() }} días sin asistir.</p>
+} @else {
+  <p class="af-muted conteo" role="status">
+    {{ n }} {{ n === 1 ? 'cliente inactivo' : 'clientes inactivos' }} (más de {{ dias() }} días sin asistir)
+  </p>
+  <div class="af-card tabla" tabindex="0" role="region" aria-label="Clientes inactivos">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Cliente</th>
+          <th scope="col">Última asistencia</th>
+          <th scope="col">Sin asistir</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of filas(); track f.idUsuario) {
+          <tr>
+            <td>
+              <b>{{ f.nombre }}</b>
+              @if (f.correo) {
+                <br /><small class="af-muted">{{ f.correo }}</small>
+              }
+            </td>
+            <td>{{ f.ultima ? fecha(f.ultima) : '—' }}</td>
+            <td>{{ f.dias === null ? 'Nunca ha asistido' : f.dias + ' días' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

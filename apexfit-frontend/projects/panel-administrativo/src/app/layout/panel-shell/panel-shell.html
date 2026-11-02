@@ -1,0 +1,93 @@
+<div class="panel">
+  <header class="barra">
+    <div class="logo" aria-label="ApexFit">APEX<b>FIT</b></div>
+    <div class="acciones-barra">
+      <lib-campana />
+      <button
+        class="hamburguesa"
+        type="button"
+        aria-controls="menu-principal"
+        [attr.aria-expanded]="menuAbierto()"
+        (click)="alternarMenu()"
+      >
+        {{ menuAbierto() ? 'Cerrar menú' : 'Menú' }}
+      </button>
+    </div>
+  </header>
+
+  <aside class="lateral" id="menu-principal" [class.abierto]="menuAbierto()">
+    <div class="logo logo-lateral" aria-hidden="true">APEX<b>FIT</b></div>
+    <lib-campana class="campana-lateral" modo="lateral" />
+    <p class="rol">{{ rolEtiqueta() }}</p>
+
+    <nav aria-label="Principal">
+      @for (item of items(); track item.ruta) {
+        <a [routerLink]="item.ruta" routerLinkActive="activo" ariaCurrentWhenActive="page" (click)="cerrarMenu()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            @switch (item.icono) {
+              @case ('resumen') {
+                <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+              }
+              @case ('asistencia') {
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <path d="M14 14h3v3M21 14v.01M14 21h3M21 17v4" />
+              }
+              @case ('inactividad') {
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+              }
+              @case ('usuarios') {
+                <circle cx="9" cy="8" r="3.5" />
+                <path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6" />
+                <path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c2 .6 3.5 2.6 3.5 5.5" />
+              }
+              @case ('asignaciones') {
+                <path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4" />
+              }
+              @case ('ejercicios') {
+                <path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11" />
+              }
+              @case ('membresias') {
+                <rect x="2.5" y="5" width="19" height="14" rx="2" />
+                <path d="M2.5 10h19M6.5 15h4" />
+              }
+              @case ('clientes') {
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
+              }
+              @case ('lista') {
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+              }
+              @case ('rutinas') {
+                <rect x="5" y="4" width="14" height="17" rx="2" />
+                <path d="M9 4V3h6v1M9 11h6M9 15h6" />
+              }
+            }
+          </svg>
+          {{ item.etiqueta }}
+        </a>
+      }
+    </nav>
+
+    <div class="cuenta">
+      <a
+        class="mi-cuenta"
+        routerLink="/cuenta"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page"
+        aria-label="Mi cuenta"
+        (click)="cerrarMenu()"
+      >
+        <span class="av" aria-hidden="true">{{ iniciales() }}</span>
+        <span class="correo">{{ correo() }}</span>
+      </a>
+      <button class="salir" type="button" (click)="auth.logout()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="contenido">
+    <router-outlet />
+  </main>
+</div>

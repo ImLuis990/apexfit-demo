@@ -1,0 +1,160 @@
+// ApexFit — tema global compartido por app-usuarios y panel-administrativo.
+// Tokens tomados de "ApexFit — Diseño completo": oscuro + rojo de marca.
+
+:root {
+  --af-bg: #0b0b0c;
+  --af-surface: #151517;
+  --af-border: #242427;
+  --af-red: #e5131d;
+  --af-red-hover: #ff4046;
+  --af-text: #f2eee6;
+  --af-muted: #9c9ca1;
+  --af-amber: #ffb020;
+  --af-ok: #3ddc97;
+
+  --af-font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --af-font-body: 'Barlow', system-ui, sans-serif;
+
+  --af-radius: 14px;
+  --af-radius-sm: 8px;
+
+  // Que el contenido no quede bajo las barras del sistema en celulares.
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  background: var(--af-bg);
+  color: var(--af-text);
+  font: 400 15px/1.5 var(--af-font-body);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.af-display {
+  font-family: var(--af-font-display);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--af-amber);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  background: var(--af-bg);
+  border: 1px solid var(--af-border);
+  border-radius: var(--af-radius-sm);
+  padding: 12px;
+  width: 100%;
+
+  &:focus {
+    border-color: var(--af-red);
+  }
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+// ── Componentes base reutilizables ──────────────────────────────────────────
+.af-btn {
+  background: var(--af-red);
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: var(--af-radius-sm);
+  font-weight: 700;
+
+  &:hover {
+    background: var(--af-red-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--outline {
+    background: none;
+    border: 1px solid var(--af-border);
+    color: var(--af-text);
+
+    &:hover {
+      background: var(--af-surface);
+    }
+  }
+
+  &--block {
+    width: 100%;
+  }
+}
+
+.af-card {
+  background: var(--af-surface);
+  border: 1px solid var(--af-border);
+  border-radius: var(--af-radius);
+  padding: 16px;
+}
+
+.af-tag {
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #3ddc9722;
+  color: var(--af-ok);
+
+  &--warn {
+    background: #ffb02022;
+    color: var(--af-amber);
+  }
+
+  &--danger {
+    background: #e5131d33;
+    color: var(--af-red-hover);
+  }
+}
+
+.af-muted {
+  color: var(--af-muted);
+}

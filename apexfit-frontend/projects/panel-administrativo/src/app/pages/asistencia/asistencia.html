@@ -1,0 +1,99 @@
+@let c = carga();
+
+<header class="cabecera">
+  <h1 class="titulo">Asistencia</h1>
+  @if (c.tipo === 'listo') {
+    <p class="dentro" role="status"><b>{{ dentro() }}</b> {{ dentro() === 1 ? 'persona dentro' : 'personas dentro' }} ahora</p>
+  }
+</header>
+
+@if (aviso(); as a) {
+  <p [class]="a.tipo === 'ok' ? 'aviso ok' : 'aviso error'" [attr.role]="a.tipo === 'ok' ? 'status' : 'alert'">
+    {{ a.texto }}
+  </p>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando asistencia…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else {
+  <div class="registro">
+    <form class="af-card" (submit)="$event.preventDefault(); registrarCodigo(cod.value); cod.value = ''">
+      <h2>Con código QR</h2>
+      <label>
+        Código
+        <input #cod type="text" name="codigo" autocomplete="off" placeholder="Escanea o pega el código" />
+      </label>
+      <p class="af-muted ayuda">Un lector de QR escribe el código solo y pulsa Enter.</p>
+      <button class="af-btn" type="submit" [disabled]="trabajando()">Registrar</button>
+    </form>
+
+    <form class="af-card" (submit)="$event.preventDefault(); registrarManual()">
+      <h2>Manual</h2>
+      <label>
+        Cliente
+        <select name="cliente" [value]="clienteManual()" (change)="elegirCliente($event)">
+          <option value="">Elige un cliente…</option>
+          @for (cl of clientes(); track cl.id) {
+            <option [value]="cl.id">{{ cl.nombreCompleto }} · {{ cl.correo }}</option>
+          }
+        </select>
+      </label>
+      <p class="af-muted ayuda">Para cuando el cliente no trae su código.</p>
+      <button class="af-btn af-btn--outline" type="submit" [disabled]="trabajando()">Registrar</button>
+    </form>
+  </div>
+
+  <h2 class="subtitulo">Hoy · {{ fecha(hoy) }}</h2>
+
+  @if (filas().length === 0) {
+    <p class="vacio">Todavía no hay entradas hoy.</p>
+  } @else {
+    <div class="af-card tabla" tabindex="0" role="region" aria-label="Asistencias de hoy">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Entrada</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Método</th>
+            <th scope="col">Salida</th>
+            <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of filas(); track f.a.id) {
+            <tr>
+              <td>{{ hora(f.a.horaEntrada) }}</td>
+              <td>
+                <b>{{ f.nombre }}</b>
+                @if (f.correo) {
+                  <br /><small class="af-muted">{{ f.correo }}</small>
+                }
+              </td>
+              <td><span class="af-tag" [class.af-tag--warn]="f.a.metodo === 'manual'">{{ f.a.metodo === 'qr' ? 'QR' : 'Manual' }}</span></td>
+              <td>
+                @if (f.adentro) {
+                  <span class="af-tag">Dentro</span>
+                } @else {
+                  {{ hora(f.a.horaSalida ?? '') }}
+                }
+              </td>
+              <td class="acciones">
+                @if (f.adentro) {
+                  <button class="af-btn af-btn--outline" type="button" [disabled]="trabajando()"
+                          [attr.aria-label]="'Registrar salida de ' + f.nombre" (click)="registrarSalida(f)">
+                    Registrar salida
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}

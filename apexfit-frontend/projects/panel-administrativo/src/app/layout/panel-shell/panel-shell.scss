@@ -1,0 +1,210 @@
+:host {
+  display: block;
+}
+
+.panel {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  font:
+    italic 800 26px 'Barlow Condensed',
+    sans-serif;
+  letter-spacing: 0.02em;
+
+  b {
+    color: var(--af-red-hover);
+  }
+}
+
+// ── Celular: barra superior + menú desplegable ──
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--af-surface);
+  border-bottom: 1px solid var(--af-border);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.hamburguesa {
+  padding: 8px 14px;
+  border: 1px solid var(--af-border);
+  border-radius: var(--af-radius-sm);
+  font-weight: 700;
+}
+
+.lateral {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: var(--af-surface);
+  border-bottom: 1px solid var(--af-border);
+
+  &.abierto {
+    display: flex;
+  }
+}
+
+.logo-lateral,
+.rol {
+  display: none;
+}
+
+nav {
+  display: grid;
+  gap: 4px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: var(--af-radius-sm);
+    color: var(--af-muted);
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--af-text);
+      background: var(--af-bg);
+    }
+
+    &.activo {
+      background: var(--af-red);
+      color: #fff;
+    }
+  }
+}
+
+.cuenta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--af-border);
+
+  // Avatar + correo: llevan a "Mi cuenta"
+  .mi-cuenta {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 4px 10px;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--af-radius-sm);
+
+    &:hover .correo,
+    &.activo .correo {
+      color: var(--af-red-hover);
+    }
+  }
+
+  .av {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--af-red);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .correo {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .salir {
+    grid-column: 1 / -1;
+    justify-self: start;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--af-muted);
+    text-decoration: underline;
+
+    &:hover {
+      color: var(--af-text);
+    }
+  }
+}
+
+.contenido {
+  flex: 1;
+  padding: 20px clamp(14px, 3vw, 32px) 32px;
+  min-width: 0;
+}
+
+// ── Pantallas anchas: menú fijo a la izquierda ──
+@media (min-width: 900px) {
+  .panel {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .barra {
+    display: none;
+  }
+
+  .lateral {
+    display: flex;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    padding: 20px 12px;
+    border-bottom: 0;
+    border-right: 1px solid var(--af-border);
+    overflow-y: auto;
+  }
+
+  .logo-lateral {
+    display: block;
+    padding: 0 10px 4px;
+  }
+
+  .rol {
+    display: block;
+    padding: 0 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--af-muted);
+  }
+
+  .cuenta {
+    margin-top: auto;
+  }
+}
+
+// Campana de notificaciones: en la barra (celular) o en el menú lateral (pantallas anchas).
+.acciones-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.campana-lateral {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .campana-lateral {
+    display: block;
+    margin-bottom: 8px;
+  }
+}

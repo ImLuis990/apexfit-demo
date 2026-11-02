@@ -1,0 +1,185 @@
+:host {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.titulo {
+  font-size: 34px;
+}
+
+.subtitulo {
+  margin: 4px 0 0;
+}
+
+.vacio {
+  border: 1px dashed var(--af-border);
+  border-radius: var(--af-radius);
+  padding: 18px;
+  text-align: center;
+  color: var(--af-muted);
+
+  p {
+    margin: 0;
+  }
+
+  .af-btn {
+    margin-top: 10px;
+  }
+
+  a {
+    color: var(--af-red-hover);
+    font-weight: 600;
+  }
+}
+
+.aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--af-radius-sm);
+  font-weight: 600;
+
+  &.ok {
+    color: var(--af-ok);
+    background: #3ddc9722;
+    border: 1px solid var(--af-ok);
+  }
+
+  &.error {
+    color: var(--af-red-hover);
+    background: #e5131d22;
+    border: 1px solid var(--af-red);
+  }
+}
+
+.error {
+  color: var(--af-red-hover);
+  font-weight: 600;
+}
+
+.nota-aviso {
+  margin: 0;
+  color: var(--af-amber);
+  font-weight: 600;
+}
+
+.formulario {
+  display: grid;
+  gap: 12px;
+
+  h2 {
+    font-size: 24px;
+  }
+
+  h3 {
+    margin: 4px 0 0;
+    font-size: 18px;
+  }
+}
+
+.linea {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 0.8fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--af-border);
+
+  .ejercicio {
+    margin: 0;
+    align-self: center;
+  }
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr 1fr;
+
+    .ejercicio {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tabla {
+  overflow-x: auto;
+  padding: 0;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--af-border);
+    white-space: nowrap;
+  }
+
+  th {
+    color: var(--af-muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.estado {
+  color: var(--af-muted);
+  font-weight: 600;
+
+  &.activa {
+    color: var(--af-ok);
+  }
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  .af-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .peligro {
+    background: var(--af-red);
+    color: #fff;
+  }
+}
+
+.confirmar {
+  font-weight: 600;
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

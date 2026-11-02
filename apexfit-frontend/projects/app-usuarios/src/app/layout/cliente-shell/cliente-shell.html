@@ -1,0 +1,53 @@
+<header class="barra">
+  <span class="marca" aria-label="ApexFit">APEX<b>FIT</b></span>
+  <lib-campana />
+</header>
+
+<main class="contenido">
+  <router-outlet />
+</main>
+
+<nav class="nav" aria-label="Principal">
+  <a routerLink="/hoy" routerLinkActive="activo" ariaCurrentWhenActive="page">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 11l9-8 9 8" />
+      <path d="M5 10v10h14V10" />
+    </svg>
+    Hoy
+  </a>
+  <a routerLink="/rutina" routerLinkActive="activo" ariaCurrentWhenActive="page">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4V3h6v1M9 11h6M9 15h6" />
+    </svg>
+    Rutina
+  </a>
+  <a routerLink="/mi-qr" routerLinkActive="activo" ariaCurrentWhenActive="page">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <path d="M14 14h3v3M21 14v.01M14 21h3M21 17v4" />
+    </svg>
+    Mi QR
+  </a>
+  <a routerLink="/historial" routerLinkActive="activo" ariaCurrentWhenActive="page">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M16 3v4M8 3v4M3 10h18M9 15l2 2 4-4" />
+    </svg>
+    Asistencia
+  </a>
+  <a routerLink="/progreso" routerLinkActive="activo" ariaCurrentWhenActive="page">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 17l6-6 4 4 8-8" />
+      <path d="M15 7h6v6" />
+    </svg>
+    Progreso
+  </a>
+</nav>

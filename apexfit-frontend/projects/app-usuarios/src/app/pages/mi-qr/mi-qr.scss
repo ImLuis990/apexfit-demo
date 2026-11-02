@@ -1,0 +1,62 @@
+@use '../pantalla';
+
+.qrbox {
+  background: var(--af-text);
+  color: var(--af-bg);
+  border-radius: 20px;
+  padding: 16px;
+  display: grid;
+  place-items: center;
+  border-bottom: 8px solid var(--af-red);
+}
+
+.qr {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  display: block;
+}
+
+.espacio {
+  width: 100%;
+  max-width: 230px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 16px;
+  border: 2px dashed #0b0b0c55;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.estado {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
+}
+
+.detalle {
+  font-size: 13px;
+}
+
+.error {
+  color: var(--af-red-hover);
+  font-weight: 600;
+}
+
+.codigo,
+.ayuda {
+  text-align: center;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+code {
+  font-size: 12px;
+}

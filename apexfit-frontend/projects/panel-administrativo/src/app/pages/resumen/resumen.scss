@@ -1,0 +1,119 @@
+@use '../usuarios/usuarios' as *;
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.kpi {
+  display: grid;
+  gap: 4px;
+
+  b {
+    font: italic 800 40px/1 var(--af-font-display);
+  }
+
+  span {
+    color: var(--af-muted);
+    font-size: 14px;
+  }
+
+  &.alerta b {
+    color: var(--af-amber);
+  }
+}
+
+.otros {
+  margin: 0;
+  font-size: 14px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
+.grafica {
+  margin: 12px 0 0;
+}
+
+.barras,
+.barras-aforo {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 140px;
+}
+
+.col,
+.col-aforo {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+
+  i {
+    width: 100%;
+    background: var(--af-red);
+    border-radius: 4px 4px 0 0;
+
+    &.vacia {
+      background: var(--af-border);
+    }
+  }
+
+  small {
+    font-size: 10px;
+    color: var(--af-muted);
+  }
+}
+
+.listas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.fila-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+
+  a {
+    color: var(--af-red-hover);
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+.mas {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.nota-aviso {
+  margin: 0;
+  color: var(--af-amber);
+  font-weight: 600;
+}

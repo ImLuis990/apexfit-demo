@@ -1,0 +1,69 @@
+<main class="login">
+  <section class="brand">
+    <h1>APEX<br />FIT</h1>
+    <p>Entrena, asiste y mide tu avance.</p>
+  </section>
+
+  <form class="fm" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <h2>Inicia sesión</h2>
+       <p class="fm__sub">Bienvenido de vuelta.</p>
+
+    <label>
+      Correo
+      <span class="ig">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="M3 7l9 6 9-6" />
+        </svg>
+        <input
+          type="email"
+          formControlName="correo"
+          autocomplete="email"
+          placeholder="tucorreo@apexfit.com"
+          [attr.aria-invalid]="correo.touched && correo.invalid"
+        />
+      </span>
+      @if (correo.touched && correo.invalid) {
+        <small class="field-error" role="alert">Escribe un correo válido.</small>
+      }
+    </label>
+    
+    <label>
+      Contraseña
+      <span class="ig">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="5" y="10" width="14" height="10" rx="2" />
+          <path d="M8 10V7a4 4 0 018 0v3" />
+        </svg>
+        <input
+          type="password"
+          formControlName="contrasena"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          [attr.aria-invalid]="contrasena.touched && contrasena.invalid"
+        />
+      </span>
+      @if (contrasena.touched && contrasena.invalid) {
+        <small class="field-error" role="alert">La contraseña es obligatoria.</small>
+      }
+    </label>
+
+    @if (error(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+
+    <button class="af-btn af-btn--block" type="submit" [disabled]="loading()">
+      {{ loading() ? 'Entrando…' : 'Entrar' }}
+    </button>
+
+    <button class="af-btn af-btn--outline af-btn--block btn-demo" type="button" [disabled]="loading()" (click)="entrarComoClienteDemo()">
+      ⚡ Probar como Cliente Demo
+    </button>
+
+        <p class="fm__alt"><a routerLink="/recuperar">¿Olvidaste tu contraseña?</a></p>
+        <p class="fm__alt">¿No tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
+        
+  </form>
+</main>

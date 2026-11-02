@@ -1,0 +1,19 @@
+@use '../../shared/styles/theme';
+
+// Enlace bajo los formularios de acceso: "¿No tienes cuenta? Regístrate" / "¿Ya tienes cuenta? Inicia sesión".
+.fm__alt {
+  text-align: center;
+  color: var(--af-muted);
+  font-size: 14px;
+  margin-top: 4px;
+
+  a {
+    color: var(--af-text);
+    font-weight: 700;
+    text-decoration: underline;
+
+    &:hover {
+      color: var(--af-red-hover);
+    }
+  }
+}

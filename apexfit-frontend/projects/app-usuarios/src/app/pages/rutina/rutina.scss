@@ -1,0 +1,52 @@
+@use '../pantalla';
+
+.descripcion {
+  font-size: 14px;
+}
+
+.reintentar {
+  margin-top: 10px;
+}
+
+.dia {
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .d {
+    min-width: 44px;
+    font:
+      italic 800 22px 'Barlow Condensed',
+      sans-serif;
+    color: var(--af-red-hover);
+  }
+
+  .info {
+    display: grid;
+    flex: 1;
+  }
+}
+
+.ejercicios {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+
+  li {
+    display: grid;
+    padding: 10px 12px;
+    background: var(--af-bg);
+    border: 1px solid var(--af-border);
+    border-radius: var(--af-radius-sm);
+  }
+}

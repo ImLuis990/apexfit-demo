@@ -1,0 +1,38 @@
+@use '../usuarios/usuarios' as *;
+
+.dentro {
+  margin: 0;
+  font-size: 15px;
+
+  b {
+    font-size: 26px;
+    font-family: var(--af-font-display);
+    font-style: italic;
+    color: var(--af-red-hover);
+  }
+}
+
+.registro {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+
+  form {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+}
+
+.ayuda {
+  margin: 0;
+  font-size: 13px;
+}
+
+.subtitulo {
+  font-size: 24px;
+}

@@ -1,0 +1,147 @@
+@let e = estado();
+
+<header>
+  <h1 class="titulo">Tu progreso</h1>
+  @if (e.tipo === 'lista') {
+    <p class="af-muted ultimo">Último registro: {{ e.vista.fechaUltimo }}</p>
+  }
+</header>
+
+@if (e.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando tu progreso…</p>
+} @else if (e.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ e.mensaje }}</p>
+    <button class="af-btn af-btn--outline reintentar" type="button" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (e.tipo === 'vacio') {
+  <p class="vacio">Aún no tienes mediciones. Registra la primera para empezar a ver tu avance.</p>
+} @else {
+  <section class="af-card" aria-label="Evolución del peso">
+    <div class="fila">
+      <b>Peso</b>
+      @if (e.vista.variacion; as v) {
+        <span class="variacion">
+          @if (v.flecha) {
+            <span aria-hidden="true">{{ v.flecha }}</span>
+          }
+          {{ v.texto }}
+        </span>
+      }
+    </div>
+
+    <figure class="grafica" role="img" [attr.aria-label]="e.vista.descripcionGrafica">
+      <div class="barras">
+        @for (b of e.vista.barras; track $index) {
+          <i [style.height.%]="b.alto" [class.actual]="b.actual" [attr.title]="b.etiqueta"></i>
+        }
+      </div>
+      <figcaption class="af-muted">{{ e.vista.rangoFechas }}</figcaption>
+    </figure>
+  </section>
+
+  <section class="af-card meas" aria-label="Medidas actuales">
+    <div><b>{{ e.vista.peso }}</b><small class="af-muted">kg</small></div>
+    <div><b>{{ e.vista.altura }}</b><small class="af-muted">m</small></div>
+    <div><b>{{ e.vista.imc }}</b><small class="af-muted">IMC</small></div>
+  </section>
+
+  <section class="af-card meas" aria-label="Perímetros en centímetros">
+    @for (m of e.vista.medidas; track m.etiqueta) {
+      <div><b>{{ m.valor }}</b><small class="af-muted">{{ m.etiqueta }} (cm)</small></div>
+    }
+  </section>
+  <section class="af-card" aria-label="Tus registros">
+    <h2>Tus registros</h2>
+    <ul class="registros">
+      @for (r of registros().slice(0, 10); track r.id) {
+        <li>
+          <span><b>{{ fecha(r.fecha) }}</b> · {{ r.peso }} kg</span>
+          <button class="af-btn af-btn--outline" type="button" (click)="editar(r)" [attr.aria-label]="'Editar registro del ' + fecha(r.fecha)">
+            Editar
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<button
+  class="af-btn"
+  type="button"
+  [class.af-btn--outline]="formAbierto()"
+  [attr.aria-expanded]="formAbierto()"
+  aria-controls="form-medidas"
+  (click)="alternarFormulario()"
+>
+  {{ formAbierto() ? 'Cancelar' : 'Registrar medidas' }}
+</button>
+
+@if (formAbierto()) {
+  <form id="form-medidas" class="af-card formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2>{{ editando() ? 'Editar medición del ' + fecha(editando()!.fecha) : 'Nueva medición' }}</h2>
+
+    <label>
+      Fecha
+      <input type="date" formControlName="fecha" [max]="hoy" />
+      @if (form.controls.fecha.touched && form.controls.fecha.invalid) {
+        <small class="error" role="alert">Escribe una fecha que no sea futura.</small>
+      }
+    </label>
+
+    <div class="par">
+      <label>
+        Peso (kg)
+        <input #peso type="number" inputmode="decimal" step="0.1" formControlName="peso" />
+        @if (form.controls.peso.touched && form.controls.peso.invalid) {
+          <small class="error" role="alert">Escribe tu peso (entre 20 y 400 kg).</small>
+        }
+      </label>
+      <label>
+        Altura (m)
+        <input type="number" inputmode="decimal" step="0.01" formControlName="altura" />
+        @if (form.controls.altura.touched && form.controls.altura.invalid) {
+          <small class="error" role="alert">Usa metros, por ejemplo 1,76.</small>
+        }
+      </label>
+    </div>
+
+    @if (!editando()) {
+      <fieldset>
+        <legend class="af-muted">Perímetros en cm (opcional)</legend>
+        <div class="trio">
+          <label>
+            Cintura
+            <input type="number" inputmode="decimal" step="0.5" formControlName="cintura" />
+          </label>
+          <label>
+            Bíceps
+            <input type="number" inputmode="decimal" step="0.5" formControlName="biceps" />
+          </label>
+          <label>
+            Pecho
+            <input type="number" inputmode="decimal" step="0.5" formControlName="pecho" />
+          </label>
+        </div>
+        @if (form.controls.cintura.invalid || form.controls.biceps.invalid || form.controls.pecho.invalid) {
+          <small class="error" role="alert">Los perímetros van entre 10 y 300 cm.</small>
+        }
+      </fieldset>
+    }
+
+    <label>
+      Observaciones (opcional)
+      <textarea rows="2" formControlName="observaciones"></textarea>
+    </label>
+
+    @if (errorForm(); as mensaje) {
+      <p class="error-form" role="alert">{{ mensaje }}</p>
+    }
+
+    <button class="af-btn af-btn--block" type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : editando() ? 'Guardar cambios' : 'Guardar medición' }}
+    </button>
+  </form>
+}

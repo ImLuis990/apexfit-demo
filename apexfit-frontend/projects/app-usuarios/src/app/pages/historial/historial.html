@@ -1,0 +1,31 @@
+@let e = estado();
+<h1 class="titulo">Tu asistencia</h1>
+
+@if (e.tipo === 'cargando') {
+  <p class="af-muted" role="status">Cargando tu historial…</p>
+} @else if (e.tipo === 'error') {
+  <p class="error" role="alert">{{ e.mensaje }}</p>
+  <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+} @else if (e.datos.length === 0) {
+  <p class="vacio">Aún no tienes asistencias registradas. Muestra tu QR en recepción para registrar tu entrada.</p>
+} @else {
+  <p class="af-muted resumen">{{ total() }} {{ total() === 1 ? 'visita registrada' : 'visitas registradas' }}</p>
+  <ul class="lista" aria-label="Historial de asistencia">
+    @for (a of e.datos; track a.id) {
+      <li class="item af-card">
+        <div class="fila">
+          <strong>{{ fecha(a.fecha) }}</strong>
+          <span class="af-tag">{{ a.metodo }}</span>
+        </div>
+        <p class="horas af-muted">
+          Entrada {{ a.entrada }} ·
+          @if (a.salida) {
+            Salida {{ a.salida }}
+          } @else {
+            Sin hora de salida
+          }
+        </p>
+      </li>
+    }
+  </ul>
+}

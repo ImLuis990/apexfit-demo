@@ -1,0 +1,44 @@
+@let m = membresia();
+@let vm = vista();
+
+<h1 class="titulo">Tu pase de entrada</h1>
+
+<div class="qrbox">
+  @if (qr(); as q) {
+    <svg
+      class="qr"
+      role="img"
+      aria-label="Código QR de acceso al gimnasio"
+      shape-rendering="crispEdges"
+      [attr.viewBox]="'-4 -4 ' + (q.lado + 8) + ' ' + (q.lado + 8)"
+    >
+      <rect x="-4" y="-4" [attr.width]="q.lado + 8" [attr.height]="q.lado + 8" fill="#fff" />
+      <path [attr.d]="q.ruta" fill="#000" />
+    </svg>
+  } @else {
+    <div class="espacio" role="img" aria-label="No hay una sesión iniciada">
+      <span>Inicia sesión para ver tu código</span>
+    </div>
+  }
+</div>
+
+<section class="estado" aria-label="Membresía">
+  @if (m.tipo === 'cargando') {
+    <p class="af-muted" role="status">Membresía: cargando…</p>
+  } @else if (m.tipo === 'error') {
+    <p class="error" role="alert">{{ m.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargarMembresia()">Reintentar</button>
+  } @else if (vm) {
+    <p>
+      <span class="af-tag" [class.af-tag--warn]="vm.estilo === 'warn'" [class.af-tag--danger]="vm.estilo === 'danger'">
+        Membresía: {{ vm.etiqueta }}
+      </span>
+    </p>
+    <p class="af-muted detalle">{{ vm.detalle }}</p>
+  }
+</section>
+
+@if (codigo(); as c) {
+  <p class="codigo af-muted">Tu código: <code>{{ c }}</code></p>
+}
+<p class="ayuda af-muted">Muéstralo en recepción para registrar tu entrada.</p>

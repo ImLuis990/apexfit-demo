@@ -1,0 +1,16 @@
+@use '../usuarios/usuarios' as *;
+
+.config {
+  display: grid;
+  gap: 8px;
+
+  input {
+    max-width: 140px;
+  }
+}
+
+.nota-aviso {
+  margin: 0;
+  color: var(--af-amber);
+  font-weight: 600;
+}

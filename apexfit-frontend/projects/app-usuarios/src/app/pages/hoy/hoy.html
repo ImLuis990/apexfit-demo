@@ -1,0 +1,89 @@
+@let r = rutina();
+@let p = plan();
+@let m = membresia();
+@let vm = vistaMembresia();
+
+<header class="fila">
+  <div>
+    <small class="dia af-muted">{{ dia }}</small>
+    <h1 class="titulo">Hola{{ nombre() ? ', ' + nombre() : '' }}</h1>
+    <small class="af-muted">{{ correo() }}</small>
+  </div>
+  <div class="cuenta">
+    <a class="av" routerLink="/cuenta" aria-label="Mi cuenta">{{ iniciales() }}</a>
+    <button class="salir" type="button" (click)="auth.logout()">Cerrar sesión</button>
+  </div>
+</header>
+
+<section class="hero" aria-label="Entrenamiento de hoy">
+  @if (r.tipo === 'cargando') {
+    <small>Entrenamiento de hoy</small>
+    <h2 role="status">Cargando…</h2>
+  } @else if (r.tipo === 'error') {
+    <small>Entrenamiento de hoy</small>
+    <p role="alert">{{ r.mensaje }}</p>
+    <button class="reintentar" type="button" (click)="cargarRutina()">Reintentar</button>
+  } @else if (p?.tipo === 'entrena') {
+    <small>Entrenamiento de hoy</small>
+    <h2>{{ p.dia.grupos.length ? p.dia.grupos.join(' · ') : 'Entrenamiento' }}</h2>
+    <p>
+      {{ p.dia.ejercicios.length }}
+      {{ p.dia.ejercicios.length === 1 ? 'ejercicio' : 'ejercicios' }} · {{ p.rutina }}
+    </p>
+    @if (p.dia.ejercicios.length > 0) {
+      <a class="iniciar" routerLink="/entrenar">Iniciar rutina de hoy</a>
+    }
+  } @else if (p?.tipo === 'descanso') {
+    <small>Hoy</small>
+    <h2>Día de descanso</h2>
+    <p>
+      @if (p.proximo; as sig) {
+        Próximo entrenamiento: {{ sig.etiqueta }}
+      } @else {
+        Tu rutina no tiene más días asignados.
+      }
+    </p>
+  } @else {
+    <small>Hoy</small>
+    <h2>Sin rutina por ahora</h2>
+    <p>Tu entrenador publicará tu rutina aquí.</p>
+  }
+</section>
+
+@if (p?.tipo === 'entrena') {
+  <ul class="ejercicios" aria-label="Ejercicios de hoy">
+    @for (x of p.dia.ejercicios; track x.id) {
+      <li class="af-card">
+        <b>{{ x.nombre }}</b>
+        <small class="af-muted">
+          {{ x.series }} × {{ x.repeticiones }}
+          @if (x.descansoSeg) {
+            · descanso {{ x.descansoSeg }} s
+          }
+        </small>
+      </li>
+    }
+  </ul>
+}
+
+<section class="af-card membresia" aria-label="Membresía">
+  <b>Membresía</b>
+  @if (m.tipo === 'cargando') {
+    <p class="af-muted" role="status">Cargando tu membresía…</p>
+  } @else if (m.tipo === 'error') {
+    <p class="error" role="alert">{{ m.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargarMembresia()">
+      Reintentar
+    </button>
+  } @else if (vm) {
+    <p>
+      <span
+        class="af-tag"
+        [class.af-tag--warn]="vm.estilo === 'warn'"
+        [class.af-tag--danger]="vm.estilo === 'danger'"
+        >{{ vm.etiqueta }}</span
+      >
+    </p>
+    <p class="af-muted">{{ vm.detalle }}</p>
+  }
+</section>

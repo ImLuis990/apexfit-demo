@@ -1,0 +1,226 @@
+:host {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.titulo {
+  font-size: 34px;
+}
+
+.subtitulo {
+  margin: 4px 0 0;
+}
+
+.vacio {
+  border: 1px dashed var(--af-border);
+  border-radius: var(--af-radius);
+  padding: 18px;
+  text-align: center;
+  color: var(--af-muted);
+
+  .af-btn {
+    margin-top: 10px;
+  }
+
+  a {
+    color: var(--af-red-hover);
+    font-weight: 600;
+  }
+}
+
+.aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--af-radius-sm);
+  font-weight: 600;
+
+  &.ok {
+    color: var(--af-ok);
+    background: #3ddc9722;
+    border: 1px solid var(--af-ok);
+  }
+
+  &.error {
+    color: var(--af-red-hover);
+    background: #e5131d22;
+    border: 1px solid var(--af-red);
+  }
+}
+
+.error {
+  color: var(--af-red-hover);
+  font-weight: 600;
+}
+
+.nota-aviso {
+  margin: 0;
+  color: var(--af-amber);
+  font-weight: 600;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.kpi {
+  display: grid;
+  gap: 2px;
+
+  b {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  span {
+    color: var(--af-muted);
+    font-size: 14px;
+  }
+
+  &.alerta b {
+    color: var(--af-amber);
+  }
+}
+
+.tablero {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 14px;
+  align-items: start;
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.entrenadores ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.entrenador {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--af-border);
+  border-radius: var(--af-radius-sm);
+  background: var(--af-surface);
+
+  small {
+    color: var(--af-muted);
+  }
+
+  &.activo {
+    border-color: var(--af-red);
+    background: #e5131d22;
+  }
+}
+
+.detalle {
+  display: grid;
+  gap: 12px;
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .correo {
+    margin: -8px 0 0;
+  }
+}
+
+.asignar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+
+  label {
+    flex: 1 1 260px;
+  }
+}
+
+.clientes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--af-border);
+  }
+
+  li:last-child {
+    border-bottom: 0;
+  }
+}
+
+.datos {
+  display: grid;
+  gap: 2px;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  .af-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .peligro {
+    background: var(--af-red);
+    color: #fff;
+  }
+}
+
+.confirmar {
+  font-weight: 600;
+}
+
+.sin-entrenador {
+  display: grid;
+  gap: 8px;
+
+  h2 {
+    font-size: 24px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.etiqueta {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--af-amber);
+  border-radius: 999px;
+  color: var(--af-amber);
+  font-size: 12px;
+  font-weight: 600;
+}

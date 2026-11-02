@@ -1,0 +1,135 @@
+@let c = carga();
+
+<header class="cabecera">
+  <h1 class="titulo">Mis clientes</h1>
+</header>
+
+@if (avisoDias(); as a) {
+  <p class="nota-aviso" role="status">{{ a }}</p>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando tus clientes…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else if (vistas().length === 0) {
+  <p class="vacio">Todavía no tienes clientes asignados. El administrador te los asigna.</p>
+} @else {
+  <p class="af-muted conteo" role="status">{{ vistas().length }} {{ vistas().length === 1 ? 'cliente' : 'clientes' }}</p>
+
+  <ul class="lista">
+    @for (v of vistas(); track v.c.idCliente) {
+      <li class="af-card cliente">
+        <div class="fila">
+          <span class="av" aria-hidden="true">{{ v.c.iniciales }}</span>
+          <div class="datos">
+            <b>{{ v.c.nombre }}</b>
+            @if (v.c.correo) {
+              <small class="af-muted">{{ v.c.correo }}</small>
+            }
+            <small [class.sin-rutina]="!v.c.rutinaActiva">
+              {{ v.c.rutinaActiva ? 'Rutina: ' + v.c.rutinaActiva : 'Sin rutina activa' }}
+            </small>
+          </div>
+          <div class="peso">
+            @if (v.peso) {
+              <b>{{ v.peso }} kg</b>
+              <small class="af-muted">{{ v.fecha }}</small>
+              @if (v.variacion; as va) {
+                <small class="variacion">
+                  @if (va.flecha) {
+                    <span aria-hidden="true">{{ va.flecha }}</span>
+                  }
+                  {{ va.texto }}
+                </small>
+              }
+            } @else {
+              <small class="af-muted">Sin mediciones</small>
+            }
+          </div>
+        </div>
+
+        <div class="botones">
+          <a class="af-btn" routerLink="/rutinas" [queryParams]="{ cliente: v.c.idCliente }"
+             [attr.aria-label]="'Nueva rutina para ' + v.c.nombre">
+            {{ v.c.rutinaActiva ? 'Nueva rutina' : 'Asignar rutina' }}
+          </a>
+          <button class="af-btn af-btn--outline" type="button" (click)="alternar(v.c.idCliente)"
+                  [attr.aria-expanded]="abierto() === v.c.idCliente"
+                  [attr.aria-label]="'Ver progreso de ' + v.c.nombre">
+            {{ abierto() === v.c.idCliente ? 'Ocultar progreso' : 'Ver progreso' }}
+          </button>
+          <button class="af-btn af-btn--outline" type="button" (click)="alternarAsistencia(v.c.idCliente)"
+                  [attr.aria-expanded]="asistenciaAbierta() === v.c.idCliente"
+                  [attr.aria-label]="'Ver asistencia de ' + v.c.nombre">
+            {{ asistenciaAbierta() === v.c.idCliente ? 'Ocultar asistencia' : 'Ver asistencia' }}
+          </button>
+        </div>
+
+        @if (abierto() === v.c.idCliente) {
+          @if (v.c.registros.length === 0) {
+            <p class="vacio">Este cliente todavía no ha registrado mediciones.</p>
+          } @else {
+            <table class="progreso">
+              <thead>
+                <tr><th scope="col">Fecha</th><th scope="col">Peso</th><th scope="col">IMC</th></tr>
+              </thead>
+              <tbody>
+                @for (r of v.c.registros.slice(0, 6); track r.id) {
+                  <tr>
+                    <td>{{ fecha(r.fecha) }}</td>
+                    <td>{{ numero(r.peso, 2) }} kg</td>
+                    <td>{{ r.imc === null ? '—' : numero(r.imc, 1) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+        @if (asistenciaAbierta() === v.c.idCliente) {
+          @let at = asistencias()[v.c.idCliente];
+          @if (!at || at.tipo === 'cargando') {
+            <p class="vacio" role="status">Cargando asistencia…</p>
+          } @else if (at.tipo === 'error') {
+            <div class="vacio" role="alert">
+              <p>{{ at.mensaje }}</p>
+              <button class="af-btn af-btn--outline" type="button" (click)="cargarAsistencia(v.c.idCliente)">Reintentar</button>
+            </div>
+          } @else if (at.datos.length === 0) {
+            <p class="vacio">Este cliente todavía no tiene asistencias registradas.</p>
+            <p class="nota-aviso" role="status">Inactivo: nunca ha asistido.</p>
+          } @else {
+            @let r = resumen(at.datos);
+            <p class="af-muted" role="status">
+              {{ r.visitas30 }} {{ r.visitas30 === 1 ? 'visita' : 'visitas' }} en los últimos 30 días
+              @if (r.ultima) {
+                · Última: {{ fecha(r.ultima) }}
+              }
+            </p>
+            @if (inactivo(r.ultima)) {
+              <p class="nota-aviso" role="status">Inactivo: lleva más de {{ dias() }} días sin asistir.</p>
+            }
+            <table class="progreso">
+              <thead>
+                <tr><th scope="col">Fecha</th><th scope="col">Entrada</th><th scope="col">Salida</th><th scope="col">Método</th></tr>
+              </thead>
+              <tbody>
+                @for (a of at.datos.slice(0, 8); track a.id) {
+                  <tr>
+                    <td>{{ fecha(a.fecha) }}</td>
+                    <td>{{ hora(a.horaEntrada) }}</td>
+                    <td>{{ a.horaSalida ? hora(a.horaSalida) : '—' }}</td>
+                    <td><span class="af-tag" [class.af-tag--warn]="a.metodo === 'manual'">{{ a.metodo === 'qr' ? 'QR' : 'Manual' }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      </li>
+    }
+  </ul>
+}

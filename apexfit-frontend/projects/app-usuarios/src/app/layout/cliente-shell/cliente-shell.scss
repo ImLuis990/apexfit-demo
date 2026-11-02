@@ -1,0 +1,71 @@
+// Columna de celular centrada: en pantallas anchas no se estira, queda como una "app".
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  border-inline: 1px solid var(--af-border);
+}
+
+.contenido {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 4px 10px;
+  background: var(--af-surface);
+  border-top: 1px solid var(--af-border);
+
+  a {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 2px;
+    min-width: 56px;
+    min-height: 48px; // área táctil cómoda
+    padding: 4px 6px;
+    border-radius: var(--af-radius-sm);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--af-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--af-text);
+    }
+
+    &.activo {
+      color: var(--af-red-hover);
+    }
+  }
+}
+
+// Encabezado mínimo con la campana de notificaciones.
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: var(--af-surface);
+  border-bottom: 1px solid var(--af-border);
+}
+
+.marca {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+
+  b {
+    color: var(--af-red);
+  }
+}

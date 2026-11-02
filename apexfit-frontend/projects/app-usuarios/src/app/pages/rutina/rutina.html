@@ -1,0 +1,59 @@
+@let e = estado();
+
+<header>
+  <h1 class="titulo">Mi rutina</h1>
+  @if (e.tipo === 'lista') {
+    <p class="af-muted">{{ e.rutina.nombre }}</p>
+  }
+</header>
+
+@if (e.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando tu rutina…</p>
+} @else if (e.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ e.mensaje }}</p>
+    <button class="af-btn af-btn--outline reintentar" type="button" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (e.tipo === 'vacia') {
+  <p class="vacio">Todavía no tienes una rutina asignada. Tu entrenador la publicará aquí.</p>
+} @else {
+  @if (e.rutina.descripcion) {
+    <p class="descripcion af-muted">{{ e.rutina.descripcion }}</p>
+  }
+
+  @for (d of e.rutina.dias; track d.etiqueta) {
+    <details class="af-card dia" [open]="d.dia === hoy">
+      <summary>
+        <span class="d" aria-hidden="true">{{ d.abreviatura }}</span>
+        <span class="info">
+          <b>{{ d.etiqueta }}</b>
+          <small class="af-muted">
+            {{ d.grupos.length ? d.grupos.join(' · ') + ' · ' : '' }}{{ d.ejercicios.length }}
+            {{ d.ejercicios.length === 1 ? 'ejercicio' : 'ejercicios' }}
+          </small>
+        </span>
+        @if (d.dia === hoy) {
+          <span class="af-tag">Hoy</span>
+        }
+      </summary>
+
+      <ul class="ejercicios">
+        @for (x of d.ejercicios; track x.id) {
+          <li>
+            <b>{{ x.nombre }}</b>
+            <small class="af-muted">
+              {{ x.series }} × {{ x.repeticiones }}
+              @if (x.descansoSeg) {
+                · descanso {{ x.descansoSeg }} s
+              }
+            </small>
+          </li>
+        }
+      </ul>
+    </details>
+  } @empty {
+    <p class="vacio">Tu rutina todavía no tiene ejercicios.</p>
+  }
+}

@@ -1,0 +1,202 @@
+// El panel se posiciona respecto al encabezado donde está la campana (que es «sticky»), por eso el host no es relative.
+:host {
+  display: inline-block;
+}
+
+.campana {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--af-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--af-text);
+  cursor: pointer;
+}
+
+.insignia {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--af-red);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  background: var(--af-surface);
+  border: 1px solid var(--af-border);
+  border-radius: 0 0 var(--af-radius) var(--af-radius);
+  box-shadow: 0 12px 32px #000a;
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  :host(:not(.en-menu)) .panel {
+    left: auto;
+    right: 12px;
+    top: calc(100% + 6px);
+    width: 400px;
+    border-radius: var(--af-radius);
+  }
+}
+
+// Dentro del menú lateral del panel (solo pantallas anchas): se abre a su derecha.
+:host(.en-menu) .panel {
+  position: fixed;
+  top: 12px;
+  left: 252px;
+  right: auto;
+  width: min(400px, calc(100vw - 264px));
+  max-height: calc(100dvh - 24px);
+  border-radius: var(--af-radius);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--af-border);
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.enlace {
+  min-height: 44px;
+  padding: 0 4px;
+  background: none;
+  border: 0;
+  color: var(--af-red-hover);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--af-muted);
+    cursor: default;
+  }
+}
+
+.aviso-error {
+  margin: 0;
+  padding: 8px 14px;
+  color: var(--af-red-hover);
+  background: #e5131d22;
+  font-weight: 600;
+}
+
+.estado {
+  margin: 0;
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--af-muted);
+
+  p {
+    margin: 0 0 10px;
+  }
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+  border-bottom: 1px solid var(--af-border);
+  --color-icono: var(--af-muted);
+
+  &[data-estilo='peligro'] {
+    --color-icono: var(--af-red-hover);
+  }
+
+  &[data-estilo='aviso'] {
+    --color-icono: var(--af-amber);
+  }
+
+  &.no-leida {
+    background: #e5131d14;
+    box-shadow: inset 3px 0 0 var(--color-icono);
+
+    .texto b {
+      font-weight: 800;
+    }
+  }
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 8px 12px 14px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.icono {
+  color: var(--color-icono);
+  padding-top: 2px;
+}
+
+.texto {
+  display: grid;
+  gap: 2px;
+
+  b {
+    color: var(--color-icono);
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--af-muted);
+  }
+}
+
+.borrar {
+  width: 44px;
+  background: none;
+  border: 0;
+  color: var(--af-muted);
+  font-size: 16px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--af-red-hover);
+  }
+}
+
+.cargar-mas {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 12px 14px;
+}

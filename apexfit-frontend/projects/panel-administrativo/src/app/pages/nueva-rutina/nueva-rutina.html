@@ -1,0 +1,125 @@
+@let c = carga();
+
+<header class="cabecera">
+  <h1 class="titulo">Nueva rutina</h1>
+</header>
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando clientes y ejercicios…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else if (sinClientes()) {
+  <p class="vacio">Todavía no tienes clientes asignados, así que no hay a quién asignarle una rutina.</p>
+} @else if (sinEjercicios()) {
+  <p class="vacio">El catálogo de ejercicios está vacío. Crea ejercicios primero para poder armar una rutina.</p>
+} @else {
+  @if (exito()) {
+    <p class="aviso ok" role="status">Rutina asignada correctamente.</p>
+  }
+  @if (errorGeneral(); as e) {
+    <p class="aviso error" role="alert">{{ e }}</p>
+  }
+  @if (resultados(); as filas) {
+    <ul class="resultados" aria-label="Resultado por cliente">
+      @for (f of filas; track f.nombre) {
+        <li [class]="'res ' + f.tipo">
+          <b>{{ f.nombre }}</b>: {{ f.texto }}
+        </li>
+      }
+    </ul>
+  }
+
+  <form class="af-card formulario" [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+    <fieldset>
+      <legend>Clientes</legend>
+      <div class="clientes">
+        @for (cl of c.datos.clientes; track cl.idCliente) {
+          <label class="check">
+            <input type="checkbox" [checked]="seleccion().has(cl.idCliente)"
+                   (change)="alternarCliente(cl.idCliente, $any($event.target).checked)" />
+            <span>{{ cl.nombre }} <small class="af-muted">{{ cl.correo }}</small></span>
+          </label>
+        }
+      </div>
+      @if (intentado() && seleccion().size === 0) {
+        <small class="error" role="alert">Elige al menos un cliente.</small>
+      }
+    </fieldset>
+
+    <div class="par">
+      <label>
+        Nombre de la rutina
+        <input type="text" formControlName="nombre" placeholder="Fuerza · semana 6" />
+        @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+          <small class="error" role="alert">Escribe un nombre (hasta 100 caracteres).</small>
+        }
+      </label>
+      <label>
+        Descripción (opcional)
+        <input type="text" formControlName="descripcion" />
+      </label>
+    </div>
+
+    <fieldset formArrayName="lineas">
+      <legend>Ejercicios</legend>
+
+      @for (linea of lineas.controls; track linea; let i = $index) {
+        <div class="linea" [formGroupName]="i">
+          <label>
+            Día
+            <select formControlName="dia">
+              <option value="">Elige…</option>
+              @for (d of dias; track d.valor) {
+                <option [value]="d.valor">{{ d.etiqueta }}</option>
+              }
+            </select>
+          </label>
+          <label class="ancho">
+            Ejercicio
+            <select formControlName="idEjercicio">
+              <option value="">Elige…</option>
+              @for (e of c.datos.ejercicios; track e.id) {
+                <option [value]="e.id">{{ e.nombre }}{{ e.grupoMuscular ? ' · ' + e.grupoMuscular : '' }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Series
+            <input type="number" inputmode="numeric" formControlName="series" />
+          </label>
+          <label>
+            Reps
+            <input type="number" inputmode="numeric" formControlName="repeticiones" />
+          </label>
+          <label>
+            Descanso (s)
+            <input type="number" inputmode="numeric" formControlName="descanso" />
+          </label>
+          <button class="af-btn af-btn--outline quitar" type="button"
+                  [attr.aria-label]="'Quitar ejercicio ' + (i + 1)"
+                  [disabled]="lineas.length === 1" (click)="quitarLinea(i)">✕</button>
+
+          @if (linea.touched && linea.invalid) {
+            <small class="error ancho-total" role="alert">
+              Elige el día y el ejercicio, con series entre 1 y 20 y repeticiones entre 1 y 100.
+            </small>
+          }
+        </div>
+      }
+
+      <button class="af-btn af-btn--outline" type="button" (click)="agregarLinea()">+ Agregar ejercicio</button>
+    </fieldset>
+
+    <p class="nota af-muted">
+      La rutina nueva reemplaza la rutina activa de cada cliente elegido. La anterior se desactiva solo
+      cuando la nueva se guardó completa.
+    </p>
+
+    <button class="af-btn" type="submit" [disabled]="enviando()">
+      {{ enviando() ? 'Asignando…' : 'Asignar rutina' }}
+    </button>
+  </form>
+}

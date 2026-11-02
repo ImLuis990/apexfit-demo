@@ -1,0 +1,117 @@
+@let c = carga();
+@let i = ind();
+
+<header class="cabecera">
+  <h1 class="titulo">Resumen</h1>
+  <p class="af-muted">Hoy · {{ fecha(hoy) }}</p>
+</header>
+
+@if (avisoDias(); as a) {
+  <p class="nota-aviso" role="status">{{ a }}</p>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando el resumen…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else if (i) {
+  <section class="kpis" aria-label="Indicadores">
+    <div class="af-card kpi"><b>{{ i.dentro }}</b><span>Dentro ahora</span></div>
+    <div class="af-card kpi"><b>{{ i.entradasHoy }}</b><span>Entradas hoy</span></div>
+    <div class="af-card kpi"><b>{{ i.clientesActivos }}</b><span>Clientes activos</span></div>
+    <div class="af-card kpi"><b>{{ i.vigentes }}</b><span>Con membresía vigente</span></div>
+    <div class="af-card kpi" [class.alerta]="i.porVencer.length > 0"><b>{{ i.porVencer.length }}</b><span>Por vencer (7 días)</span></div>
+    <div class="af-card kpi" [class.alerta]="i.inactivos.length > 0"><b>{{ i.inactivos.length }}</b><span>Inactivos (+{{ diasInactividad }} días)</span></div>
+  </section>
+
+  @if (i.dash; as d) {
+    <p class="otros af-muted">
+      {{ d.totalEntrenadores }} entrenadores · {{ d.totalRutinas }} rutinas · {{ d.totalEjercicios }} ejercicios
+      @if (i.metodos.length) {
+        · Entradas por método:
+        @for (m of i.metodos; track m.nombre; let ultimo = $last) {
+          {{ m.nombre }} {{ m.cantidad }}{{ ultimo ? '' : ',' }}
+        }
+      }
+    </p>
+  } @else {
+    <p class="otros af-muted" role="status">Algunos datos generales no están disponibles ahora.</p>
+  }
+
+  <section class="af-card" aria-label="Entradas por hora">
+    <h2>Entradas por hora (hoy)</h2>
+    <figure class="grafica" role="img" [attr.aria-label]="i.descripcionHoras">
+      <div class="barras">
+        @for (h of i.horas; track h.hora) {
+          <span class="col" [attr.title]="h.hora + ':00 · ' + h.cantidad">
+            <i [style.height.%]="h.alto" [class.vacia]="h.cantidad === 0"></i>
+            <small>{{ h.hora }}</small>
+          </span>
+        }
+      </div>
+    </figure>
+  </section>
+
+  <section class="af-card" aria-label="Aforo por hora">
+    <h2>Aforo por hora (hoy)</h2>
+    <p class="af-muted">Dentro ahora: <b>{{ i.dentro }}</b> · {{ i.resumenAforo }}</p>
+    <figure class="grafica" role="img" [attr.aria-label]="i.resumenAforo">
+      <div class="barras-aforo">
+        @for (h of i.aforo; track h.hora) {
+          <span class="col-aforo" [attr.title]="h.hora + ':00 · ' + h.personas">
+            <i [style.height.%]="h.alto" [class.vacia]="h.personas === 0"></i>
+            <small>{{ h.hora }}</small>
+          </span>
+        }
+      </div>
+      <figcaption class="af-muted">Personas presentes en cada hora; quien aún no marcó salida cuenta hasta ahora.</figcaption>
+    </figure>
+  </section>
+  <div class="listas">
+    <section class="af-card" aria-label="Membresías por vencer">
+      <div class="fila-titulo">
+        <h2>Por vencer</h2>
+        <a routerLink="/membresias">Ver membresías</a>
+      </div>
+      @if (i.porVencer.length === 0) {
+        <p class="af-muted">Ninguna membresía vence en los próximos 7 días.</p>
+      } @else {
+        <ul>
+          @for (f of i.porVencer.slice(0, maxFilas); track f.idUsuario) {
+            <li>
+              <b>{{ f.nombre }}</b>
+              <span class="af-muted">{{ f.diasRestantes === 0 ? 'vence hoy' : f.diasRestantes === 1 ? 'vence mañana' : 'vence en ' + f.diasRestantes + ' días' }} · {{ corta(f.vence) }}</span>
+            </li>
+          }
+        </ul>
+        @if (i.porVencer.length > maxFilas) {
+          <p class="af-muted mas">y {{ i.porVencer.length - maxFilas }} más</p>
+        }
+      }
+    </section>
+
+    <section class="af-card" aria-label="Clientes inactivos">
+      <div class="fila-titulo">
+        <h2>Inactivos</h2>
+      </div>
+      @if (i.inactivos.length === 0) {
+        <p class="af-muted">Todos los clientes con membresía vigente han asistido en los últimos {{ diasInactividad }} días.</p>
+      } @else {
+        <ul>
+          @for (f of i.inactivos.slice(0, maxFilas); track f.idUsuario) {
+            <li>
+              <b>{{ f.nombre }}</b>
+              <span class="af-muted">{{ f.dias === null ? 'nunca ha asistido' : 'hace ' + f.dias + ' días' }}</span>
+            </li>
+          }
+        </ul>
+        @if (i.inactivos.length > maxFilas) {
+          <p class="af-muted mas">y {{ i.inactivos.length - maxFilas }} más</p>
+        }
+      }
+    </section>
+  </div>
+}

@@ -1,0 +1,177 @@
+@let c = carga();
+
+<header class="cabecera">
+  <div>
+    <h1 class="titulo">Ejercicios</h1>
+    <p class="af-muted subtitulo">El catálogo con el que se arman las rutinas.</p>
+  </div>
+  <button class="af-btn" type="button" (click)="abrirCrear()">+ Nuevo ejercicio</button>
+</header>
+
+@if (aviso(); as a) {
+  <p [class]="a.tipo === 'ok' ? 'aviso ok' : 'aviso error'" [attr.role]="a.tipo === 'ok' ? 'status' : 'alert'">
+    {{ a.texto }}
+  </p>
+}
+
+@if (modo(); as m) {
+  <form class="af-card formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2>{{ m === 'crear' ? 'Nuevo ejercicio' : 'Editar ejercicio' }}</h2>
+
+    <label>
+      Nombre
+      <input type="text" formControlName="nombre" maxlength="100" autocomplete="off" />
+      @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+        <small class="error" role="alert">Escribe el nombre del ejercicio.</small>
+      }
+    </label>
+
+    <div class="par">
+      <label>
+        Grupo muscular
+        <input type="text" formControlName="grupoMuscular" maxlength="50" list="grupos-sugeridos" autocomplete="off" />
+        <datalist id="grupos-sugeridos">
+          @for (g of grupos(); track g) {
+            <option [value]="g"></option>
+          }
+        </datalist>
+      </label>
+      <label>
+        Dificultad
+        <select formControlName="nivel">
+          <option value="">Sin definir</option>
+          @for (n of niveles; track n) {
+            <option [value]="n">{{ etiquetaNivel(n) }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Video (opcional)
+      <input type="url" formControlName="videoUrl" maxlength="255" placeholder="https://…" autocomplete="off" />
+      @if (form.controls.videoUrl.touched && form.controls.videoUrl.invalid) {
+        <small class="error" role="alert">Escribe un enlace que empiece por http:// o https://.</small>
+      }
+    </label>
+
+    <div class="acciones">
+      <button class="af-btn" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Guardar' }}</button>
+      <button class="af-btn af-btn--outline" type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando ejercicios…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else {
+  @if (c.datos.total > c.datos.ejercicios.length) {
+    <p class="nota-aviso" role="status">
+      Hay {{ c.datos.total }} ejercicios en total y aquí se cargan los primeros {{ tamanoPagina }}.
+    </p>
+  }
+
+  @if (c.datos.ejercicios.length === 0) {
+    <div class="vacio">
+      <p>Todavía no hay ejercicios. Crea uno, o carga unos de ejemplo para poder armar rutinas.</p>
+      <button class="af-btn" type="button" [disabled]="ocupado() !== null" (click)="cargarEjemplos()">
+        {{ ocupado() === 0 ? 'Cargando…' : 'Cargar ejercicios de ejemplo' }}
+      </button>
+    </div>
+  } @else {
+    <div class="filtros">
+      <label>
+        Buscar
+        <input type="search" placeholder="Nombre del ejercicio" [value]="texto()" (input)="texto.set(valor($event))" />
+      </label>
+      <label>
+        Grupo muscular
+        <select [value]="grupo()" (change)="grupo.set(valor($event))">
+          <option value="">Todos</option>
+          @for (g of grupos(); track g) {
+            <option [value]="g">{{ g }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Dificultad
+        <select [value]="nivel()" (change)="nivel.set(valor($event))">
+          <option value="">Todas</option>
+          @for (n of niveles; track n) {
+            <option [value]="n">{{ etiquetaNivel(n) }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    @if (visibles().length === 0) {
+      <p class="vacio">Ningún ejercicio coincide con los filtros.</p>
+    } @else {
+      <div class="af-card tabla">
+        <table>
+          <caption class="solo-lectores">Ejercicios del catálogo</caption>
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Grupo muscular</th>
+              <th scope="col">Dificultad</th>
+              <th scope="col">Video</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of visibles(); track e.id) {
+              <tr>
+                <td>
+                  <b>{{ e.nombre }}</b>
+                </td>
+                <td>{{ e.grupoMuscular ?? '—' }}</td>
+                <td>{{ etiquetaNivel(e.nivel) }}</td>
+                <td>
+                  @if (e.videoUrl) {
+                    <a [href]="e.videoUrl" target="_blank" rel="noopener noreferrer">Ver</a>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>
+                  <div class="acciones">
+                    @if (confirmandoId() === e.id) {
+                      <span class="confirmar">¿Borrar?</span>
+                      <button class="af-btn peligro" type="button" (click)="borrar(e)">Sí, borrar</button>
+                      <button class="af-btn af-btn--outline" type="button" (click)="descartarBorrado()">No</button>
+                    } @else {
+                      <button
+                        class="af-btn af-btn--outline"
+                        type="button"
+                        [disabled]="ocupado() !== null"
+                        [attr.aria-label]="'Editar ' + e.nombre"
+                        (click)="abrirEditar(e)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="af-btn af-btn--outline"
+                        type="button"
+                        [disabled]="ocupado() !== null"
+                        [attr.aria-label]="'Borrar ' + e.nombre"
+                        (click)="pedirBorrado(e)"
+                      >
+                        Borrar
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+}

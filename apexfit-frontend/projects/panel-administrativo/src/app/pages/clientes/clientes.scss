@@ -1,0 +1,91 @@
+@use '../usuarios/usuarios' as *;
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.cliente {
+  display: grid;
+  gap: 12px;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.av {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--af-red);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+}
+
+.datos {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+
+  small {
+    overflow-wrap: anywhere;
+  }
+}
+
+.sin-rutina {
+  color: var(--af-amber);
+  font-weight: 600;
+}
+
+.peso {
+  display: grid;
+  text-align: right;
+  justify-items: end;
+}
+
+.variacion {
+  font-weight: 700;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  a.af-btn {
+    text-decoration: none;
+    display: inline-block;
+  }
+}
+
+.progreso {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--af-border);
+  }
+
+  th {
+    color: var(--af-muted);
+    font-size: 13px;
+  }
+}
+
+.nota-aviso {
+  margin: 0;
+  color: var(--af-amber);
+  font-weight: 600;
+}

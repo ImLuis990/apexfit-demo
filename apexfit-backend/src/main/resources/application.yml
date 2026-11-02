@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ApexFit
+  profiles:
+    active: ${APP_PROFILE:dev}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate # Flyway handles the DDL
+
+springdoc:
+  override-with-generic-response: false
+
+
+logging:
+  level:
+    com.apexfit: INFO
+    org.springframework.web: DEBUG

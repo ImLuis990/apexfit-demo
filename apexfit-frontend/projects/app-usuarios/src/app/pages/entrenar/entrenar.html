@@ -1,0 +1,118 @@
+<header class="fila">
+  <a class="volver" routerLink="/hoy">← Hoy</a>
+  <h1 class="titulo">Rutina de hoy</h1>
+</header>
+
+@let c = carga();
+
+@if (sinSincronizar()) {
+  <p class="sin-sincronizar" role="status">Sin conexión con el servidor: tu avance se guarda solo en este dispositivo.</p>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando tu rutina…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else if (sesion(); as s) {
+  @if (s.terminada) {
+    <section class="af-card resumen" aria-labelledby="titulo-resumen">
+      <h2 id="titulo-resumen">{{ resumen().sinHacer.length ? 'Terminaste por hoy' : '¡Rutina completada!' }}</h2>
+
+      <h3>Completados ({{ resumen().completados.length }})</h3>
+      @if (resumen().completados.length) {
+        <ul>
+          @for (n of resumen().completados; track $index) {
+            <li>{{ n }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="af-muted">Ninguno.</p>
+      }
+
+      <h3>Aplazados sin hacer ({{ resumen().sinHacer.length }})</h3>
+      @if (resumen().sinHacer.length) {
+        <ul class="sin-hacer">
+          @for (n of resumen().sinHacer; track $index) {
+            <li>{{ n }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="af-muted">Ninguno: hiciste todo.</p>
+      }
+
+      <a class="af-btn af-btn--block grande" routerLink="/hoy">Volver a Hoy</a>
+    </section>
+  } @else if (actual(); as x) {
+    <div
+      class="barra"
+      role="progressbar"
+      aria-label="Avance de la rutina"
+      aria-valuemin="0"
+      [attr.aria-valuemax]="total()"
+      [attr.aria-valuenow]="s.completados.length"
+    >
+      <span [style.width.%]="avance()"></span>
+    </div>
+    <p class="contador">Ejercicio {{ posicion() }} de {{ total() }}</p>
+
+    @if (soloAplazados()) {
+      <p class="aplazados" role="status">
+        {{ restantes() === 1 ? 'Te queda 1 aplazado' : 'Te quedan ' + restantes() + ' aplazados' }}
+      </p>
+    }
+
+    <section class="af-card ejercicio" aria-live="polite">
+      <h2>{{ x.nombre }}</h2>
+      @if (x.grupoMuscular) {
+        <small class="af-muted">{{ x.grupoMuscular }}</small>
+      }
+      <dl class="datos">
+        <div>
+          <dt>Series</dt>
+          <dd>{{ x.series }}</dd>
+        </div>
+        <div>
+          <dt>Repeticiones</dt>
+          <dd>{{ x.repeticiones }}</dd>
+        </div>
+        @if (x.descansoSeg) {
+          <div>
+            <dt>Descanso</dt>
+            <dd>{{ x.descansoSeg }} s</dd>
+          </div>
+        }
+      </dl>
+      @if (x.videoUrl) {
+        <a class="video" [href]="x.videoUrl" target="_blank" rel="noopener noreferrer">▶ Ver video</a>
+      }
+    </section>
+
+    <div class="acciones">
+      <button class="af-btn af-btn--block grande" type="button" (click)="completar()">Completado</button>
+      <button class="af-btn af-btn--outline af-btn--block grande" type="button" [disabled]="restantes() < 2" (click)="aplazar()">
+        Aplazar
+      </button>
+      @if (soloAplazados()) {
+        <button class="af-btn af-btn--outline af-btn--block" type="button" (click)="terminar()">Terminar sin los aplazados</button>
+      }
+    </div>
+  }
+
+  <div class="reiniciar">
+    @if (confirmandoReinicio()) {
+      <span>¿Borrar el avance de hoy y empezar de nuevo?</span>
+      <button class="af-btn peligro" type="button" (click)="reiniciar()">Sí, reiniciar</button>
+      <button class="af-btn af-btn--outline" type="button" (click)="cancelarReinicio()">No</button>
+    } @else {
+      <button class="enlace" type="button" (click)="pedirReinicio()">Reiniciar el avance de hoy</button>
+    }
+  </div>
+} @else {
+  <div class="vacio">
+    <p>Hoy no tienes ejercicios para entrenar.</p>
+    <a class="af-btn" routerLink="/hoy">Volver a Hoy</a>
+  </div>
+}

@@ -1,0 +1,29 @@
+@use '../pantalla';
+
+.resumen {
+  margin: 0;
+  font-size: 13px;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  display: grid;
+  gap: 4px;
+}
+
+.horas {
+  margin: 0;
+  font-size: 13px;
+}
+
+.error {
+  color: var(--af-red-hover);
+  font-weight: 600;
+}

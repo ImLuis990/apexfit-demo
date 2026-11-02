@@ -1,0 +1,196 @@
+@let c = carga();
+
+<header class="cabecera">
+  <h1 class="titulo">Usuarios</h1>
+  <button class="af-btn" type="button" (click)="abrirCrear()">+ Nuevo usuario</button>
+</header>
+
+@if (aviso(); as a) {
+  <p [class]="a.tipo === 'ok' ? 'aviso ok' : 'aviso error'" [attr.role]="a.tipo === 'ok' ? 'status' : 'alert'">
+    {{ a.texto }}
+  </p>
+}
+
+@if (formAbierto()) {
+  <form class="af-card formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2>{{ editando() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+
+    <div class="par">
+      <label>
+        Nombre
+        <input type="text" formControlName="nombre" autocomplete="off" />
+        @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+          <small class="error" role="alert">El nombre es obligatorio.</small>
+        }
+      </label>
+      <label>
+        Apellido
+        <input type="text" formControlName="apellido" autocomplete="off" />
+        @if (form.controls.apellido.touched && form.controls.apellido.invalid) {
+          <small class="error" role="alert">El apellido es obligatorio.</small>
+        }
+      </label>
+    </div>
+
+    <label>
+      Correo
+      <input type="email" formControlName="correo" autocomplete="off" />
+      @if (form.controls.correo.touched && form.controls.correo.invalid) {
+        <small class="error" role="alert">Escribe un correo válido.</small>
+      }
+    </label>
+
+    <div class="par">
+      <label>
+        Teléfono (opcional)
+        <input type="tel" inputmode="numeric" formControlName="telefono" autocomplete="off" />
+        @if (form.controls.telefono.touched && form.controls.telefono.invalid) {
+          <small class="error" role="alert">Solo números, entre 7 y 15 dígitos.</small>
+        }
+      </label>
+      <label>
+        Rol
+        <select formControlName="rol">
+          @for (r of roles; track r.valor) {
+            <option [value]="r.valor">{{ r.etiqueta }}</option>
+          }
+        </select>
+        @if (editando()?.id === miId()) {
+          <small class="af-muted">No puedes cambiar tu propio rol.</small>
+        }
+      </label>
+    </div>
+
+    @if (!editando()) {
+      <p class="af-muted nota">
+        El usuario se crea con la contraseña inicial indicada al guardar; debe cambiarla al entrar.
+      </p>
+    }
+
+    @if (errorForm(); as mensaje) {
+      <p class="aviso error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="botones">
+      <button class="af-btn" type="submit" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : editando() ? 'Guardar cambios' : 'Crear usuario' }}
+      </button>
+      <button class="af-btn af-btn--outline" type="button" (click)="cerrarFormulario()">Cancelar</button>
+    </div>
+  </form>
+}
+
+@if (c.tipo === 'cargando') {
+  <p class="vacio" role="status">Cargando usuarios…</p>
+} @else if (c.tipo === 'error') {
+  <div class="vacio" role="alert">
+    <p>{{ c.mensaje }}</p>
+    <button class="af-btn af-btn--outline" type="button" (click)="cargar()">Reintentar</button>
+  </div>
+} @else {
+  <div class="filtros">
+    <label>
+      Buscar
+      <input #q type="search" placeholder="Nombre o correo" [value]="texto()" (input)="texto.set(q.value)" />
+    </label>
+    <label>
+      Rol
+      <select #fr (change)="filtroRol.set(fr.value)">
+        <option value="todos">Todos</option>
+        @for (r of roles; track r.valor) {
+          <option [value]="r.valor">{{ r.etiqueta }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Estado
+      <select #fe (change)="filtroEstado.set(fe.value)">
+        <option value="todos">Todos</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Inactivos</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="af-muted conteo" role="status">
+    Mostrando {{ visibles().length }} de {{ c.datos.usuarios.length }} usuarios
+  </p>
+
+  @if (c.datos.total > c.datos.usuarios.length) {
+    <p class="aviso error">
+      Hay {{ c.datos.total }} usuarios en total y aquí se cargan los primeros {{ tamanoPagina }}.
+    </p>
+  }
+
+  @if (visibles().length === 0) {
+    <p class="vacio">
+      {{ c.datos.usuarios.length === 0 ? 'Todavía no hay usuarios.' : 'Ningún usuario coincide con la búsqueda.' }}
+    </p>
+  } @else {
+    <div class="af-card tabla" role="region" aria-label="Tabla de usuarios" tabindex="0">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Correo</th>
+            <th scope="col">Rol</th>
+            <th scope="col">Estado</th>
+            <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of visibles(); track u.id) {
+            <tr>
+              <td>{{ u.nombreCompleto }}</td>
+              <td class="af-muted">{{ u.correo }}</td>
+              <td>{{ u.rolEtiqueta }}</td>
+              <td>
+                <span class="af-tag" [class.af-tag--danger]="!u.activo">{{ u.activo ? 'activo' : 'inactivo' }}</span>
+              </td>
+              <td class="acciones">
+                @if (confirmandoId() === u.id) {
+                  <span class="confirmar">¿Desactivar a {{ u.nombre }}?</span>
+                  <button class="af-btn peligro" type="button" (click)="desactivar(u)">Sí, desactivar</button>
+                  <button class="af-btn af-btn--outline" type="button" (click)="cancelarConfirmacion()">Cancelar</button>
+                } @else {
+                  <button
+                    class="af-btn af-btn--outline"
+                    type="button"
+                    [attr.aria-label]="'Editar a ' + u.nombreCompleto"
+                    [disabled]="trabajandoId() === u.id"
+                    (click)="abrirEditar(u)"
+                  >
+                    Editar
+                  </button>
+                  @if (u.activo) {
+                    @if (u.id !== miId()) {
+                      <button
+                        class="af-btn af-btn--outline"
+                        type="button"
+                        [attr.aria-label]="'Desactivar a ' + u.nombreCompleto"
+                        [disabled]="trabajandoId() === u.id"
+                        (click)="pedirConfirmacion(u)"
+                      >
+                        Desactivar
+                      </button>
+                    }
+                  } @else {
+                    <button
+                      class="af-btn af-btn--outline"
+                      type="button"
+                      [attr.aria-label]="'Activar a ' + u.nombreCompleto"
+                      [disabled]="trabajandoId() === u.id"
+                      (click)="activar(u)"
+                    >
+                      Activar
+                    </button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}

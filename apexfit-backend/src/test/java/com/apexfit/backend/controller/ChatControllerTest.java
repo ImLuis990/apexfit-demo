@@ -3,6 +3,7 @@ package com.apexfit.backend.controller;
 import com.apexfit.backend.dto.chat.ChatMessageDto;
 import com.apexfit.backend.dto.chat.ChatRequestDto;
 import com.apexfit.backend.dto.chat.ChatResponseDto;
+import com.apexfit.backend.repository.MembresiaRepository;
 import com.apexfit.backend.repository.UsuarioRepository;
 import com.apexfit.backend.service.ClaudeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ class ChatControllerTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private MembresiaRepository membresiaRepository;
 
     @InjectMocks
     private ChatController chatController;

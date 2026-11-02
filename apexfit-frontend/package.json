@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run build:shared && ng build app-usuarios",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:shared": "ng build shared --configuration development",

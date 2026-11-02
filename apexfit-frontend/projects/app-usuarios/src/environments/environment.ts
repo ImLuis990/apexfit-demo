@@ -1,7 +1,5 @@
 export const environment = {
   production: true,
-  // En producción la API se sirve detrás del mismo dominio (ajustar cuando se despliegue).
-  apiUrl: '/api/v1',
-  // Dirección del panel (ajustar al desplegar; aquí se asume el mismo dominio, ruta /panel).
+  apiUrl: 'https://apexfit-demo-1.onrender.com/api/v1',
   panelUrl: '/panel',
 };

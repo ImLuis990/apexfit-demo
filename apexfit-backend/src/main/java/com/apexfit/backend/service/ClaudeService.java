@@ -20,7 +20,7 @@ import java.util.Map;
 public class ClaudeService {
 
     private static final Logger log = LoggerFactory.getLogger(ClaudeService.class);
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
 
     private static final String SYSTEM_PROMPT = """
             Eres el asistente virtual de ApexFit, una plataforma integral de gestión de gimnasios.

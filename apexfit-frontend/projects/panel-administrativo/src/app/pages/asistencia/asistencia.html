@@ -26,7 +26,7 @@
       <div class="camara-header">
         <h2>Escanear QR con Cámara</h2>
         <button class="af-btn af-btn--sm" [class.af-btn--outline]="escaneando()" type="button" (click)="alternarCamara()">
-          {{ escaneando() ? '⏹ Detener cámara' : '📷 Abrir cámara' }}
+          {{ escaneando() ? 'Detener cámara' : 'Abrir cámara' }}
         </button>
       </div>
       @if (errorCamara(); as err) {

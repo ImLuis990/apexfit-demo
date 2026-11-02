@@ -13,14 +13,21 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding-bottom: 70px; /* Espacio para que el contenido no quede tapado por la barra fija */
 }
 
 .nav {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 100;
   display: flex;
   justify-content: space-around;
-  padding: 6px 4px 10px;
+  padding: 6px 4px calc(10px + env(safe-area-inset-bottom, 0px));
   background: var(--af-surface);
   border-top: 1px solid var(--af-border);
 

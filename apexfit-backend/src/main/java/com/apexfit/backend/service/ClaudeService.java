@@ -30,6 +30,12 @@ public class ClaudeService {
             - ADMINISTRADOR: gestión de aforo, membresías, alertas del sistema
             Responde siempre en español, tono amigable y motivador.
             No inventes datos del usuario. Si algo está fuera de tu alcance, sugiere contactar soporte humano.
+
+            REGLA DE AUTENTICACIÓN:
+            El usuario ya inició sesión y está autenticado mediante JWT.
+            NUNCA le pidas su correo, contraseña, documento ni número de socio para identificarlo.
+            Tú ya recibes su identidad y los datos de su cuenta (incluyendo su nombre y el estado de su membresía) en el contexto adjunto.
+            Si el usuario pregunta por su membresía o días restantes, consulta directamente los datos del contexto proporcionado. Si el contexto indica que no tiene membresía activa o no tiene ninguna registrada, indícaselo claramente con amabilidad e invítalo a renovar o adquirir una en la sección de Membresías o en recepción.
             """;
 
     private final RestClient restClient;

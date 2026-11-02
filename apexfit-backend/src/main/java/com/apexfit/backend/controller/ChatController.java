@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ public class ChatController {
     @PostMapping
     public ResponseEntity<ChatResponseDto> chat(@Valid @RequestBody ChatRequestDto request) {
         String contextInfo = armarContextoUsuario();
-        log.info("Chat invoked. Contexto generado: {}", contextInfo);
+        log.info("Chat invocado con contexto:\n{}", contextInfo);
         ChatResponseDto response = claudeService.generarRespuesta(request, contextInfo);
         return ResponseEntity.ok(response);
     }
@@ -59,7 +60,6 @@ public class ChatController {
                 log.warn("SecurityContextHolder authentication es null");
                 return null;
             }
-            log.info("Authentication principal type: {}", auth.getPrincipal().getClass().getName());
 
             Integer idUsuario = null;
             String correo = null;
@@ -96,18 +96,19 @@ public class ChatController {
                 sb.append(String.format("- Rol en ApexFit: %s\n", rol));
                 sb.append(String.format("- Estado de la cuenta: %s\n", estado));
 
-                // Buscar membresía
+                // Buscar la membresía más vigente (la que tenga mayor fechaFin)
                 List<Membresia> membresias = membresiaRepository.findByUsuario_IdUsuario(u.getIdUsuario());
                 LocalDate hoy = LocalDate.now();
+
                 Optional<Membresia> activaOpt = membresias.stream()
                         .filter(m -> "activa".equalsIgnoreCase(m.getEstado()) && (m.getFechaFin() == null || !m.getFechaFin().isBefore(hoy)))
-                        .findFirst();
+                        .max(Comparator.comparing(Membresia::getFechaFin));
 
                 if (activaOpt.isPresent()) {
                     Membresia m = activaOpt.get();
                     long diasRestantes = ChronoUnit.DAYS.between(hoy, m.getFechaFin());
                     sb.append(String.format(
-                            "- Membresía actual: %s | Estado: Activa | Fecha fin: %s | Días restantes: %d días\n",
+                            "- Membresía actual: %s | Estado: Activa | Vence el: %s | Días restantes: %d días\n",
                             m.getTipo(), m.getFechaFin(), Math.max(0, diasRestantes)
                     ));
                 } else if (!membresias.isEmpty()) {
@@ -121,13 +122,14 @@ public class ChatController {
                 }
 
                 sb.append("Instrucciones obligatorias para el asistente:\n");
-                sb.append("1. El usuario YA está autenticado. Tienes acceso legítimo a sus datos arriba.\n");
-                sb.append("2. NUNCA le pidas correo, ID, cédula o número de socio.\n");
-                sb.append("3. Dirígete a él por su nombre directamente y responde sus dudas con la información arriba provista.");
+                sb.append("1. El usuario YA está autenticado. Conoces su nombre, correo y estado de membresía reales dados arriba.\n");
+                sb.append("2. NUNCA le pidas correo, ID, cédula ni ningún dato personal.\n");
+                sb.append("3. NUNCA digas que estás en una simulación o que no tienes contexto. Tienes la información exacta arriba.\n");
+                sb.append("4. Salúdalo por su nombre y responde directamente cuántos días le quedan usando la fecha y días exactos indicados.");
 
                 return sb.toString();
             } else {
-                log.warn("No se encontró el usuario en base de datos para id={} o correo={}", idUsuario, correo);
+                log.warn("Usuario no encontrado en BD. idUsuario={}, correo={}", idUsuario, correo);
             }
         } catch (Exception e) {
             log.error("Error al armar contexto de usuario: {}", e.getMessage(), e);

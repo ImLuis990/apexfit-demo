@@ -37,8 +37,8 @@ public class ClaudeService {
     @Value("${gemini.api.key:${anthropic.api.key:}}")
     private String apiKey;
 
-    public ClaudeService(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.build();
+    public ClaudeService() {
+        this.restClient = RestClient.create();
     }
 
     public ChatResponseDto generarRespuesta(ChatRequestDto request) {

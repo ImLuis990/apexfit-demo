@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -35,6 +36,9 @@ class ChatControllerTest {
 
     @Mock
     private MembresiaRepository membresiaRepository;
+
+    @Mock
+    private Authentication authentication;
 
     @InjectMocks
     private ChatController chatController;
@@ -58,7 +62,7 @@ class ChatControllerTest {
 
         when(claudeService.generarRespuesta(any(ChatRequestDto.class), nullable(String.class))).thenReturn(mockResponse);
 
-        ResponseEntity<ChatResponseDto> response = chatController.chat(requestDto);
+        ResponseEntity<ChatResponseDto> response = chatController.chat(requestDto, authentication);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());

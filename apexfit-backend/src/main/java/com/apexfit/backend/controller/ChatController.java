@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,31 +45,26 @@ public class ChatController {
     }
 
     @PostMapping
-    public ResponseEntity<ChatResponseDto> chat(@Valid @RequestBody ChatRequestDto request) {
-        String contextInfo = armarContextoUsuario();
+    public ResponseEntity<ChatResponseDto> chat(@Valid @RequestBody ChatRequestDto request, Authentication authentication) {
+        String contextInfo = armarContextoUsuario(authentication);
         log.info("Chat invocado con contexto:\n{}", contextInfo);
         ChatResponseDto response = claudeService.generarRespuesta(request, contextInfo);
         return ResponseEntity.ok(response);
     }
 
-    private String armarContextoUsuario() {
+    private String armarContextoUsuario(Authentication authentication) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null) {
-                log.warn("SecurityContextHolder authentication es null");
+            if (authentication == null) {
+                log.warn("Authentication parameter es null");
                 return null;
             }
 
             Integer idUsuario = null;
-            String correo = null;
+            String correo = authentication.getName();
 
-            if (auth.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
                 idUsuario = userDetails.getIdUsuario();
                 correo = userDetails.getUsername();
-            } else if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails ud) {
-                correo = ud.getUsername();
-            } else if (auth.getName() != null) {
-                correo = auth.getName();
             }
 
             Optional<Usuario> usuarioOpt = Optional.empty();

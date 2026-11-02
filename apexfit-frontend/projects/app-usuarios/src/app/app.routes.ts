@@ -60,6 +60,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/progreso/progreso').then((m) => m.Progreso),
         title: 'Progreso · ApexFit',
       },
+      {
+        path: 'mi-entrenador',
+        loadComponent: () => import('./pages/mi-entrenador/mi-entrenador').then((m) => m.MiEntrenador),
+        title: 'Mi Entrenador · ApexFit',
+      },
     ],
   },
   { path: '**', redirectTo: '' },

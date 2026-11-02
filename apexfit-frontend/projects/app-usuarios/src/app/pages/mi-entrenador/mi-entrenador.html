@@ -1,0 +1,83 @@
+<section class="entrenador-page">
+
+  <h2 class="titulo">Mi Entrenador</h2>
+
+  @switch (estado().tipo) {
+
+    @case ('cargando') {
+      <div class="estado-centro">
+        <div class="spinner" aria-label="Cargando..."></div>
+        <p>Cargando...</p>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="estado-centro estado-error">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <p>{{ estado().tipo === 'error' ? $any(estado()).mensaje : '' }}</p>
+        <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+      </div>
+    }
+
+    @case ('sin-entrenador') {
+      <div class="estado-centro">
+        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <p class="sin-asignacion">Aún no tienes un entrenador asignado.</p>
+        <p class="sin-asignacion-sub">Consulta en recepción para que te asignen uno. 💪</p>
+      </div>
+    }
+
+    @case ('ok') {
+      <div class="tarjeta">
+        <!-- Avatar con iniciales -->
+        <div class="avatar" aria-hidden="true">
+          {{ iniciales($any(estado()).entrenador.nombre, $any(estado()).entrenador.apellido) }}
+        </div>
+
+        <div class="info">
+          <h3 class="nombre">
+            {{ $any(estado()).entrenador.nombre }} {{ $any(estado()).entrenador.apellido }}
+          </h3>
+          <span class="badge" [class.badge--activo]="$any(estado()).entrenador.estado === 'activa'">
+            {{ $any(estado()).entrenador.estado === 'activa' ? 'Asignación activa' : $any(estado()).entrenador.estado }}
+          </span>
+        </div>
+
+        <ul class="contacto">
+          <li>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M2 7l10 7 10-7"/>
+            </svg>
+            <a [href]="mailtoLink($any(estado()).entrenador.correo)">
+              {{ $any(estado()).entrenador.correo }}
+            </a>
+          </li>
+
+          @if ($any(estado()).entrenador.telefono) {
+            <li>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3 4.18 2 2 0 0 1 5 2h2.09a2 2 0 0 1 2 1.72c.13 1 .37 1.97.72 2.9a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.18-1.18a2 2 0 0 1 2.11-.45c.93.35 1.9.59 2.9.72A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <a [href]="telLink($any(estado()).entrenador.telefono)">
+                {{ $any(estado()).entrenador.telefono }}
+              </a>
+            </li>
+          }
+        </ul>
+
+        <p class="aviso">
+          💬 Para comunicarte con tu entrenador, escríbele al correo o llámalo por teléfono.
+          Él podrá orientarte con tus rutinas y seguimiento físico.
+        </p>
+      </div>
+    }
+  }
+
+</section>

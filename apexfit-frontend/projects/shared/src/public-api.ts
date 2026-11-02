@@ -17,3 +17,6 @@ export * from './lib/notificaciones/notificacion.models';
 export * from './lib/notificaciones/notificacion.utils';
 export * from './lib/notificaciones/notificaciones.service';
 export * from './lib/notificaciones/campana';
+export * from './lib/chat/chat.models';
+export * from './lib/chat/chat.service';
+export * from './lib/chat/chatbot';

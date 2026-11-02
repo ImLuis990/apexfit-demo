@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AuthService, Campana } from 'shared';
+import { AuthService, Campana, ChatBotComponent } from 'shared';
 import { esRolDelPanel, ItemMenu, menuDe } from '../menu';
 
 const ETIQUETA_ROL = { administrador: 'Administrador', entrenador: 'Entrenador' } as const;
@@ -8,7 +8,7 @@ const ETIQUETA_ROL = { administrador: 'Administrador', entrenador: 'Entrenador' 
 /** Marco del panel: menú lateral en pantallas anchas y menú desplegable en celulares. */
 @Component({
   selector: 'app-panel-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Campana],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Campana, ChatBotComponent],
   templateUrl: './panel-shell.html',
   styleUrl: './panel-shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -91,41 +91,43 @@ public class ChatController {
                 String estado = u.getEstado() != null ? u.getEstado() : "activo";
 
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("- Nombre del usuario: %s\n", nombreCompleto.isEmpty() ? u.getCorreo() : nombreCompleto));
+                sb.append(String.format("- Nombre del cliente: %s\n", nombreCompleto.isEmpty() ? u.getCorreo() : nombreCompleto));
                 sb.append(String.format("- Correo: %s\n", u.getCorreo()));
                 sb.append(String.format("- Rol en ApexFit: %s\n", rol));
                 sb.append(String.format("- Estado de la cuenta: %s\n", estado));
 
-                // Buscar la membresía más vigente (la que tenga mayor fechaFin)
+                // Buscar la membresía vinculada exactamente igual que la pantalla 'Hoy' del cliente
                 List<Membresia> membresias = membresiaRepository.findByUsuario_IdUsuario(u.getIdUsuario());
                 LocalDate hoy = LocalDate.now();
 
+                // Ordenamos por fechaFin descendente para encontrar la más vigente
                 Optional<Membresia> activaOpt = membresias.stream()
-                        .filter(m -> "activa".equalsIgnoreCase(m.getEstado()) && (m.getFechaFin() == null || !m.getFechaFin().isBefore(hoy)))
+                        .filter(m -> "activa".equalsIgnoreCase(m.getEstado()) && m.getFechaFin() != null && !m.getFechaFin().isBefore(hoy))
                         .max(Comparator.comparing(Membresia::getFechaFin));
 
                 if (activaOpt.isPresent()) {
                     Membresia m = activaOpt.get();
                     long diasRestantes = ChronoUnit.DAYS.between(hoy, m.getFechaFin());
                     sb.append(String.format(
-                            "- Membresía actual: %s | Estado: Activa | Vence el: %s | Días restantes: %d días\n",
+                            "- Membresía vinculada: Plan %s | Estado: Activa | Fecha de vencimiento: %s | Días restantes calculados: %d días\n",
                             m.getTipo(), m.getFechaFin(), Math.max(0, diasRestantes)
                     ));
                 } else if (!membresias.isEmpty()) {
-                    Membresia m = membresias.get(0);
+                    Membresia ultima = membresias.stream()
+                            .max(Comparator.comparing(Membresia::getFechaFin))
+                            .orElse(membresias.get(0));
                     sb.append(String.format(
-                            "- Membresía: %s | Estado: %s (venció el %s)\n",
-                            m.getTipo(), m.getEstado(), m.getFechaFin()
+                            "- Membresía: Plan %s | Estado: %s (venció el %s)\n",
+                            ultima.getTipo(), ultima.getEstado(), ultima.getFechaFin()
                     ));
                 } else {
-                    sb.append("- Membresía: El usuario no tiene ninguna membresía registrada actualmente.\n");
+                    sb.append("- Membresía: El cliente no tiene ninguna membresía registrada en el sistema.\n");
                 }
 
-                sb.append("Instrucciones obligatorias para el asistente:\n");
-                sb.append("1. El usuario YA está autenticado. Conoces su nombre, correo y estado de membresía reales dados arriba.\n");
-                sb.append("2. NUNCA le pidas correo, ID, cédula ni ningún dato personal.\n");
-                sb.append("3. NUNCA digas que estás en una simulación o que no tienes contexto. Tienes la información exacta arriba.\n");
-                sb.append("4. Salúdalo por su nombre y responde directamente cuántos días le quedan usando la fecha y días exactos indicados.");
+                sb.append("\nInstrucciones estrictas para la IA:\n");
+                sb.append("1. El cliente YA está autenticado y su membresía ya fue consultada y vinculada en los datos anteriores.\n");
+                sb.append("2. Si te pregunta por cuántos días le quedan a su membresía, responde con los datos exactos del plan, la fecha de vencimiento y los días restantes que aparecen arriba.\n");
+                sb.append("3. NUNCA digas que no tienes acceso a sus datos, ni que es una simulación, ni le pidas que revise la app ni que ingrese datos.");
 
                 return sb.toString();
             } else {

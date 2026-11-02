@@ -3,8 +3,7 @@ package com.apexfit.backend.controller;
 import com.apexfit.backend.dto.chat.ChatMessageDto;
 import com.apexfit.backend.dto.chat.ChatRequestDto;
 import com.apexfit.backend.dto.chat.ChatResponseDto;
-import com.apexfit.backend.repository.MembresiaRepository;
-import com.apexfit.backend.repository.UsuarioRepository;
+import com.apexfit.backend.service.ChatContextService;
 import com.apexfit.backend.service.ClaudeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,10 +31,7 @@ class ChatControllerTest {
     private ClaudeService claudeService;
 
     @Mock
-    private UsuarioRepository usuarioRepository;
-
-    @Mock
-    private MembresiaRepository membresiaRepository;
+    private ChatContextService chatContextService;
 
     @Mock
     private Authentication authentication;
@@ -60,6 +56,8 @@ class ChatControllerTest {
                 .response("Puedes ver tu rutina en la pestaña 'Hoy'.")
                 .build();
 
+        when(chatContextService.construirContexto(nullable(Integer.class), nullable(String.class)))
+                .thenReturn("- Nombre del cliente: USER DEMO\n- Membresía vinculada: Plan Trimestral | Estado: Activa | Días restantes: 73 días\n");
         when(claudeService.generarRespuesta(any(ChatRequestDto.class), nullable(String.class))).thenReturn(mockResponse);
 
         ResponseEntity<ChatResponseDto> response = chatController.chat(requestDto, authentication);

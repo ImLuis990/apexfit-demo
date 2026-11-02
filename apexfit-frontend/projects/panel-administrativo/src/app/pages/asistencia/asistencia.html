@@ -22,13 +22,27 @@
   </div>
 } @else {
   <div class="registro">
+    <div class="af-card camara-card">
+      <div class="camara-header">
+        <h2>Escanear QR con Cámara</h2>
+        <button class="af-btn af-btn--sm" [class.af-btn--outline]="escaneando()" type="button" (click)="alternarCamara()">
+          {{ escaneando() ? '⏹ Detener cámara' : '📷 Abrir cámara' }}
+        </button>
+      </div>
+      @if (errorCamara(); as err) {
+        <p class="error-camara" role="alert">{{ err }}</p>
+      }
+      <div id="lector-qr" class="lector-camara" [class.activo]="escaneando()"></div>
+      <p class="af-muted ayuda">Apunta la cámara al código QR del cliente para registrar su entrada o salida en tiempo real.</p>
+    </div>
+
     <form class="af-card" (submit)="$event.preventDefault(); registrarCodigo(cod.value); cod.value = ''">
-      <h2>Con código QR</h2>
+      <h2>Con lector de mano / Código</h2>
       <label>
         Código
         <input #cod type="text" name="codigo" autocomplete="off" placeholder="Escanea o pega el código" />
       </label>
-      <p class="af-muted ayuda">Un lector de QR escribe el código solo y pulsa Enter.</p>
+      <p class="af-muted ayuda">Un lector USB/Bluetooth o escáner escribe el código y pulsa Enter.</p>
       <button class="af-btn" type="submit" [disabled]="trabajando()">Registrar</button>
     </form>
 

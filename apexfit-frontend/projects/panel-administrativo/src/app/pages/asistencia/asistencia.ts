@@ -4,10 +4,12 @@ import {
   computed,
   DestroyRef,
   inject,
+  OnDestroy,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, Observable } from 'rxjs';
+import { Html5Qrcode } from 'html5-qrcode';
 import { Carga } from '../../data/carga';
 import { mensajeDeError, mensajeDeGuardado } from '../../data/errores';
 import { codigoDe, deDia, estaAdentro, leerCodigo } from '../../data/asistencias.mapper';
@@ -41,7 +43,7 @@ type Via = 'qr' | 'manual';
   styleUrl: './asistencia.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsistenciaPagina {
+export class AsistenciaPagina implements OnDestroy {
   private readonly asistencias = inject(AsistenciasService);
   private readonly usuarios = inject(UsuariosService);
   private readonly membresias = inject(MembresiasService);
@@ -55,6 +57,12 @@ export class AsistenciaPagina {
   protected readonly clienteManual = signal('');
   protected readonly trabajando = signal(false);
   protected readonly aviso = signal<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+
+  protected readonly escaneando = signal(false);
+  protected readonly errorCamara = signal<string | null>(null);
+  private lectorQr: Html5Qrcode | null = null;
+  private ultimoCodigoEscaneado = '';
+  private tiempoUltimoEscaneo = 0;
 
   protected readonly filas = computed<Fila[]>(() => {
     const c = this.carga();
@@ -79,6 +87,62 @@ export class AsistenciaPagina {
     this.cargar();
   }
 
+  ngOnDestroy(): void {
+    void this.detenerCamara();
+  }
+
+  protected alternarCamara(): void {
+    if (this.escaneando()) {
+      void this.detenerCamara();
+    } else {
+      void this.iniciarCamara();
+    }
+  }
+
+  protected async iniciarCamara(): Promise<void> {
+    this.errorCamara.set(null);
+    try {
+      if (!this.lectorQr) {
+        this.lectorQr = new Html5Qrcode('lector-qr');
+      }
+      this.escaneando.set(true);
+      await this.lectorQr.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        (codigoTexto) => {
+          const ahora = Date.now();
+          // Debounce de 3 segundos para evitar lecturas duplicadas en ráfaga
+          if (codigoTexto === this.ultimoCodigoEscaneado && ahora - this.tiempoUltimoEscaneo < 3000) {
+            return;
+          }
+          this.ultimoCodigoEscaneado = codigoTexto;
+          this.tiempoUltimoEscaneo = ahora;
+          this.registrarCodigo(codigoTexto);
+        },
+        () => {
+          // Ignorar frames sin QR
+        }
+      );
+    } catch (err: unknown) {
+      this.escaneando.set(false);
+      this.errorCamara.set('No se pudo acceder a la cámara. Revisa los permisos del navegador.');
+    }
+  }
+
+  protected async detenerCamara(): Promise<void> {
+    if (this.lectorQr && this.escaneando()) {
+      try {
+        await this.lectorQr.stop();
+      } catch {
+        // Ignorar si ya estaba detenido
+      }
+    }
+    this.escaneando.set(false);
+  }
+
   protected cargar(mostrarCarga = true): void {
     if (mostrarCarga) this.carga.set({ tipo: 'cargando' });
     forkJoin({
@@ -99,7 +163,7 @@ export class AsistenciaPagina {
     this.clienteManual.set((evento.target as HTMLSelectElement).value);
   }
 
-  /** Recibe el texto tal como está en el campo (la plantilla lo vacía enseguida, para el siguiente código). */
+  /** Recibe el texto tal como está en el campo o desde el escáner QR. */
   protected registrarCodigo(texto: string): void {
     const leido = leerCodigo(texto);
     if (!leido) {

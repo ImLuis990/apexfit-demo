@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AsistenciaService {
+
+    private static final ZoneId ZONA_HORARIA = ZoneId.of("America/Bogota");
 
     private final AsistenciaRepository repo;
     private final UsuarioRepository usuarioRepository;
@@ -44,8 +47,8 @@ public class AsistenciaService {
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + dto.getIdUsuario()));
         a.setUsuario(usuario);
-        a.setFecha(dto.getFecha() != null ? dto.getFecha() : LocalDate.now());
-        a.setHoraEntrada(dto.getHoraEntrada() != null ? dto.getHoraEntrada() : LocalTime.now().truncatedTo(ChronoUnit.SECONDS));
+        a.setFecha(dto.getFecha() != null ? dto.getFecha() : LocalDate.now(ZONA_HORARIA));
+        a.setHoraEntrada(dto.getHoraEntrada() != null ? dto.getHoraEntrada() : LocalTime.now(ZONA_HORARIA).truncatedTo(ChronoUnit.SECONDS));
         a.setHoraSalida(dto.getHoraSalida());
         a.setMetodoRegistro(dto.getMetodoRegistro() != null ? dto.getMetodoRegistro() : "QR");
         return toDto(repo.save(a));
@@ -63,8 +66,8 @@ public class AsistenciaService {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario con id " + idUsuario + " no encontrado"));
 
-        LocalDate hoy = LocalDate.now();
-        LocalTime ahora = LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
+        LocalDate hoy = LocalDate.now(ZONA_HORARIA);
+        LocalTime ahora = LocalTime.now(ZONA_HORARIA).truncatedTo(ChronoUnit.SECONDS);
 
         // Buscar entrada abierta de hoy (sin hora de salida)
         Optional<Asistencia> entradaAbierta = repo.findByUsuario_IdUsuario(idUsuario)
@@ -108,7 +111,7 @@ public class AsistenciaService {
         if (a.getHoraSalida() != null) {
             throw new IllegalStateException("Esta asistencia ya tiene hora de salida registrada.");
         }
-        a.setHoraSalida(LocalTime.now().truncatedTo(ChronoUnit.SECONDS));
+        a.setHoraSalida(LocalTime.now(ZONA_HORARIA).truncatedTo(ChronoUnit.SECONDS));
         return toDto(repo.save(a));
     }
 

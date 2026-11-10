@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class DashboardService {
         long totalActivos = usuarioRepository.countByEstado("activo");
         long totalEntrenadores = usuarioRepository.countByRol_NombreRol("entrenador");
         long totalMembresiasActivas = membresiaRepository.countByEstado("activa");
-        long totalAsistenciasHoy = asistenciaRepository.countByFecha(LocalDate.now());
+        long totalAsistenciasHoy = asistenciaRepository.countByFecha(LocalDate.now(ZoneId.of("America/Bogota")));
         long totalEjercicios = ejercicioRepository.count();
         long totalRutinas = rutinaRepository.count();
 

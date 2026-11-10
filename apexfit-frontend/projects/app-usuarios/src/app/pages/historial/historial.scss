@@ -15,12 +15,67 @@
 
 .item {
   display: grid;
-  gap: 4px;
+  gap: 6px;
+
+  &--activa {
+    border-left: 3px solid var(--af-red);
+  }
 }
 
-.horas {
-  margin: 0;
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.horas-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.horario {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
+}
+
+.en-gym {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--af-red);
+}
+
+.duracion {
+  margin: 0;
+  font-size: 12px;
+  color: var(--af-muted);
+}
+
+.btn-salida {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border: 1px solid var(--af-red);
+  border-radius: var(--af-radius-sm);
+  background: transparent;
+  color: var(--af-red);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: start;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--af-red);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .error {

@@ -57,7 +57,18 @@ public class AsistenciaController {
 
     @PostMapping("/escanear-qr")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENTRENADOR', 'CLIENTE')")
-    public ResponseEntity<AsistenciaDto> registrarPorQr(@Valid @RequestBody com.apexfit.backend.dto.EscanearQrRequest request) {
+    public ResponseEntity<AsistenciaDto> registrarPorQr(
+            @Valid @RequestBody com.apexfit.backend.dto.EscanearQrRequest request) {
         return new ResponseEntity<>(asistenciaService.registrarPorQr(request.getQrData()), HttpStatus.CREATED);
+    }
+
+    /**
+     * Registra la hora de salida en una asistencia abierta (sin salida).
+     * PATCH /api/v1/asistencias/{id}/salida
+     */
+    @PatchMapping("/{id}/salida")
+    @PreAuthorize("hasAnyRole('CLIENTE', 'ADMINISTRADOR')")
+    public ResponseEntity<AsistenciaDto> registrarSalida(@PathVariable Long id) {
+        return ResponseEntity.ok(asistenciaService.registrarSalida(id));
     }
 }

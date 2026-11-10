@@ -10,7 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,40 +44,48 @@ public class AsistenciaService {
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + dto.getIdUsuario()));
         a.setUsuario(usuario);
-        a.setFecha(dto.getFecha() != null ? dto.getFecha() : java.time.LocalDate.now());
-        a.setHoraEntrada(dto.getHoraEntrada() != null ? dto.getHoraEntrada() : java.time.LocalTime.now());
+        a.setFecha(dto.getFecha() != null ? dto.getFecha() : LocalDate.now());
+        a.setHoraEntrada(dto.getHoraEntrada() != null ? dto.getHoraEntrada() : LocalTime.now().truncatedTo(ChronoUnit.SECONDS));
         a.setHoraSalida(dto.getHoraSalida());
         a.setMetodoRegistro(dto.getMetodoRegistro() != null ? dto.getMetodoRegistro() : "QR");
         return toDto(repo.save(a));
     }
 
+    /**
+     * Lógica de entrada/salida por QR (toggle):
+     * - Si el usuario tiene una entrada HOY sin hora de salida → registra la SALIDA.
+     * - Si no tiene entrada abierta hoy → registra una nueva ENTRADA.
+     */
     @Transactional
     public AsistenciaDto registrarPorQr(String qrData) {
-        // Formato esperado: "APEXFIT-USER-{id}-{correo}" o simplemente "{id}"
-        Integer idUsuario;
-        if (qrData.startsWith("APEXFIT-USER-")) {
-            String[] parts = qrData.split("-");
-            idUsuario = Integer.parseInt(parts[2]);
+        Integer idUsuario = resolverIdUsuario(qrData);
+
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con id " + idUsuario + " no encontrado"));
+
+        LocalDate hoy = LocalDate.now();
+        LocalTime ahora = LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+        // Buscar entrada abierta de hoy (sin hora de salida)
+        Optional<Asistencia> entradaAbierta = repo.findByUsuario_IdUsuario(idUsuario)
+                .stream()
+                .filter(a -> hoy.equals(a.getFecha()) && a.getHoraSalida() == null)
+                .findFirst();
+
+        if (entradaAbierta.isPresent()) {
+            // Segundo escaneo → registrar hora de salida
+            Asistencia a = entradaAbierta.get();
+            a.setHoraSalida(ahora);
+            return toDto(repo.save(a));
         } else {
-            try {
-                idUsuario = Integer.parseInt(qrData.trim());
-            } catch (NumberFormatException e) {
-                Usuario u = usuarioRepository.findByCorreo(qrData.trim())
-                        .orElseThrow(() -> new ResourceNotFoundException("Código QR inválido o usuario no encontrado"));
-                idUsuario = u.getIdUsuario();
-            }
+            // Primer escaneo (o ya registró salida antes) → nueva entrada
+            Asistencia a = new Asistencia();
+            a.setUsuario(usuario);
+            a.setFecha(hoy);
+            a.setHoraEntrada(ahora);
+            a.setMetodoRegistro("QR");
+            return toDto(repo.save(a));
         }
-
-        final Integer finalUserId = idUsuario;
-        Usuario usuario = usuarioRepository.findById(finalUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario con id " + finalUserId + " no encontrado"));
-
-        Asistencia a = new Asistencia();
-        a.setUsuario(usuario);
-        a.setFecha(java.time.LocalDate.now());
-        a.setHoraEntrada(java.time.LocalTime.now());
-        a.setMetodoRegistro("QR");
-        return toDto(repo.save(a));
     }
 
     @Transactional
@@ -85,11 +97,42 @@ public class AsistenciaService {
         return toDto(repo.save(a));
     }
 
+    /**
+     * Registra la hora de salida en una asistencia específica por ID.
+     * Usado cuando el cliente pulsa "Registrar salida" desde la app.
+     */
+    @Transactional
+    public AsistenciaDto registrarSalida(Long id) {
+        Asistencia a = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Asistencia no encontrada con id: " + id));
+        if (a.getHoraSalida() != null) {
+            throw new IllegalStateException("Esta asistencia ya tiene hora de salida registrada.");
+        }
+        a.setHoraSalida(LocalTime.now().truncatedTo(ChronoUnit.SECONDS));
+        return toDto(repo.save(a));
+    }
+
     @Transactional
     public void delete(Long id) {
         if (!repo.existsById(id))
             throw new ResourceNotFoundException("Asistencia no encontrada con id: " + id);
         repo.deleteById(id);
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+
+    private Integer resolverIdUsuario(String qrData) {
+        if (qrData.startsWith("APEXFIT-USER-")) {
+            String[] parts = qrData.split("-");
+            return Integer.parseInt(parts[2]);
+        }
+        try {
+            return Integer.parseInt(qrData.trim());
+        } catch (NumberFormatException e) {
+            return usuarioRepository.findByCorreo(qrData.trim())
+                    .orElseThrow(() -> new ResourceNotFoundException("Código QR inválido o usuario no encontrado"))
+                    .getIdUsuario();
+        }
     }
 
     private AsistenciaDto toDto(Asistencia a) {

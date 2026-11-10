@@ -12,19 +12,52 @@
   <p class="af-muted resumen">{{ total() }} {{ total() === 1 ? 'visita registrada' : 'visitas registradas' }}</p>
   <ul class="lista" aria-label="Historial de asistencia">
     @for (a of e.datos; track a.id) {
-      <li class="item af-card">
+      <li class="item af-card" [class.item--activa]="!a.salida">
         <div class="fila">
           <strong>{{ fecha(a.fecha) }}</strong>
           <span class="af-tag">{{ a.metodo }}</span>
         </div>
-        <p class="horas af-muted">
-          Entrada {{ a.entrada }} ·
+
+        <div class="horas-fila">
+          <span class="horario af-muted">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+            Entrada {{ a.entrada }}
+          </span>
+
           @if (a.salida) {
-            Salida {{ a.salida }}
+            <span class="horario af-muted">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+              </svg>
+              Salida {{ a.salida }}
+            </span>
           } @else {
-            Sin hora de salida
+            <span class="en-gym">🏋️ En el gym</span>
           }
-        </p>
+        </div>
+
+        @if (a.salida && a.duracionMin !== null) {
+          <p class="duracion">
+            ⏱ {{ duracion(a.duracionMin) }} en el gimnasio
+          </p>
+        }
+
+        @if (!a.salida) {
+          <button
+            class="btn-salida"
+            type="button"
+            [disabled]="registrandoSalida() === a.id"
+            (click)="registrarSalida(a)"
+          >
+            @if (registrandoSalida() === a.id) {
+              Registrando…
+            } @else {
+              Registrar salida
+            }
+          </button>
+        }
       </li>
     }
   </ul>

@@ -16,4 +16,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
 
     @Query("SELECT MAX(a.fecha) FROM Asistencia a WHERE a.usuario.idUsuario = :idUsuario")
     LocalDate findUltimaFechaAsistencia(@Param("idUsuario") Integer idUsuario);
+
+    boolean existsByUsuario_IdUsuarioAndFechaAndHoraSalidaIsNull(Integer idUsuario, LocalDate fecha);
 }

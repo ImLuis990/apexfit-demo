@@ -114,8 +114,8 @@ export class AsistenciaPagina implements OnDestroy {
         },
         (codigoTexto) => {
           const ahora = Date.now();
-          // Debounce de 3 segundos para evitar lecturas duplicadas en ráfaga
-          if (codigoTexto === this.ultimoCodigoEscaneado && ahora - this.tiempoUltimoEscaneo < 3000) {
+          // Debounce de 10 segundos para el mismo código para evitar registrar salida accidental en ráfaga
+          if (codigoTexto === this.ultimoCodigoEscaneado && ahora - this.tiempoUltimoEscaneo < 10000) {
             return;
           }
           this.ultimoCodigoEscaneado = codigoTexto;

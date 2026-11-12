@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,14 +58,14 @@ public class AsistenciaService {
         a.setFecha(fecha);
         a.setHoraEntrada(dto.getHoraEntrada() != null ? dto.getHoraEntrada() : LocalTime.now(ZONA_HORARIA).truncatedTo(ChronoUnit.SECONDS));
         a.setHoraSalida(dto.getHoraSalida());
-        a.setMetodoRegistro(dto.getMetodoRegistro() != null ? dto.getMetodoRegistro() : "manual");
+        a.setMetodoRegistro(dto.getMetodoRegistro() != null ? dto.getMetodoRegistro().toLowerCase() : "manual");
         return toDto(repo.save(a));
     }
 
     /**
-     * Registro de asistencia por escaneo QR.
-     * Si el usuario ya está adentro (asistencia activa sin hora de salida hoy),
-     * no permite registrar otra asistencia hasta que registre su salida.
+     * Lógica de entrada/salida por QR (toggle):
+     * - Si el usuario tiene una entrada HOY sin hora de salida → registra la SALIDA.
+     * - Si no tiene entrada abierta hoy → registra una nueva ENTRADA.
      */
     @Transactional
     public AsistenciaDto registrarPorQr(String qrData) {
@@ -76,17 +77,26 @@ public class AsistenciaService {
         LocalDate hoy = LocalDate.now(ZONA_HORARIA);
         LocalTime ahora = LocalTime.now(ZONA_HORARIA).truncatedTo(ChronoUnit.SECONDS);
 
-        // Validación: no permitir registrar otra asistencia si ya está adentro hoy
-        if (repo.existsByUsuario_IdUsuarioAndFechaAndHoraSalidaIsNull(idUsuario, hoy)) {
-            throw new RuntimeException("El usuario ya se encuentra dentro de las instalaciones. Debe registrar su salida antes de registrar una nueva asistencia.");
-        }
+        // Buscar entrada abierta de hoy (sin hora de salida)
+        Optional<Asistencia> entradaAbierta = repo.findByUsuario_IdUsuario(idUsuario)
+                .stream()
+                .filter(a -> hoy.equals(a.getFecha()) && a.getHoraSalida() == null)
+                .findFirst();
 
-        Asistencia a = new Asistencia();
-        a.setUsuario(usuario);
-        a.setFecha(hoy);
-        a.setHoraEntrada(ahora);
-        a.setMetodoRegistro("QR");
-        return toDto(repo.save(a));
+        if (entradaAbierta.isPresent()) {
+            // Segundo escaneo → registrar hora de salida
+            Asistencia a = entradaAbierta.get();
+            a.setHoraSalida(ahora);
+            return toDto(repo.save(a));
+        } else {
+            // Primer escaneo (o ya registró salida antes) → nueva entrada
+            Asistencia a = new Asistencia();
+            a.setUsuario(usuario);
+            a.setFecha(hoy);
+            a.setHoraEntrada(ahora);
+            a.setMetodoRegistro("qr");
+            return toDto(repo.save(a));
+        }
     }
 
     @Transactional

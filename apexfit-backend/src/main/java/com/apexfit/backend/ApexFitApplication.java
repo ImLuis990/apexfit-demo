@@ -17,6 +17,8 @@ public class ApexFitApplication {
     }
 
     public static void main(String[] args) {
+        System.setProperty("user.timezone", "America/Bogota");
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Bogota"));
         SpringApplication.run(ApexFitApplication.class, args);
     }
 }
